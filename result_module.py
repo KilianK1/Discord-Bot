@@ -16,4 +16,5 @@ class result:
         datestring = self.date.strftime('%a, %d.%m.%y, %H:%M Uhr') #datetime to string format
         text = f'__**{self.league}**__\n**{datestring}:** {self.me} {self.result} {self.enemy}'
         return text
+    #test
     
