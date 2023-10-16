@@ -67,7 +67,7 @@ async def add_result(interaction: discord.Interaction, mein_team: str, gegner_te
     try:
         date_format = zeit_format(datum = datum, zeit = uhrzeit) #format
     except:
-         message.edit('Format von Zeit oder Datum war nicht richtig, bitte versuche es erneut', delete_after= 30)
+         await message.edit(content='Format von Zeit oder Datum war nicht richtig, bitte versuche es erneut', delete_after= 30)
          return
 
     
@@ -89,6 +89,12 @@ async def add_result(interaction: discord.Interaction, mein_team: str, gegner_te
     format = 'BO1, BO2, etc. oder leer lassen'
 )
 async def edit_result(interaction: discord.Interaction, message_id: str, mein_team: str = '-1', gegner_team: str = '-1', datum: str = '-1', liga: str = '-1', uhrzeit: str = '-1', ergebnis: str = '-1', format: str = '-1'):
+    try:
+        response_id = interaction.message.reference.message_id
+    except:
+        await interaction.response.send_message('Etwas ist schiefgelaufen, du musst auf das Ergebnis, welches du bearbeiten willst antworten', delete_after = 30)
+        return
+    
     result_list.edit(message_id, mein_team, gegner_team, datum, liga, uhrzeit, ergebnis, format)
 
 
