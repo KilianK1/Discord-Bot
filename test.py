@@ -4,7 +4,7 @@ from discord import app_commands
 import json
 import datetime
 from typing import Optional
-import result_module
+import result_object
 import result_list
 
 
