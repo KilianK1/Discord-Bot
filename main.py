@@ -1,5 +1,6 @@
 from datetime import datetime
 import locale
+import pickle
 import discord
 from discord import app_commands
 import json
@@ -99,7 +100,10 @@ async def add_result(
     result_list.add(res)
 
 
-@client.tree.command()
+@client.tree.command(
+    name="edit",
+    description="Nutze die Message_ID vom Ergebnis um es zu bearbeiten, leer = nichts ändern"
+)
 @app_commands.describe(
     message_id="Die ID der Nachricht die du bearbeiten willst",
     mein_team="Der Name deines Teams",
@@ -122,17 +126,37 @@ async def edit_result(
     format: str = "-1",
 ):
     try:
-        response_id = interaction.message.reference.message_id
+        message = await interaction.channel.fetch_message(message_id)
     except:
         await interaction.response.send_message(
-            "Etwas ist schiefgelaufen, du musst auf das Ergebnis, welches du bearbeiten willst antworten",
+            "Etwas ist schiefgelaufen, überprüfe ob deine Messagge_ID stimmt",
             delete_after=30,
         )
         return
+    
+    if(datum != "-1"):
+        date = zeit_format(datum, "00:00") # überprüfe format von datum und uhrzeit unabhängig voneinander
+    if(uhrzeit != "-1"):
+        date = zeit_format("01.01.23", uhrzeit)
+    else:
+        date = zeit_format("01.01.23", "00:00")
+    
+    res = result_object.result(
+        mein_team,
+        gegner_team,
+        date,
+        liga,
+        ergebnis,
+        format,
+        message_id,
 
-    result_list.edit(
-        message_id, mein_team, gegner_team, datum, liga, uhrzeit, ergebnis, format
     )
+    res = result_list.edit(message_id, res, uhrzeit, datum)
+    await message.edit(
+        content=res.toString()
+        + f"\nNutze diese Message_ID zum löschen oder bearbeiten deines Ergebnisses: {message_id}"
+    )
+
 
 
 def zeit_format(datum: str, zeit: str):
@@ -151,9 +175,9 @@ def zeit_format(datum: str, zeit: str):
         raise Exception("Invalid date given")
 
     try:
-        print(
-            f"{zeit} = zeit\n{zeit_parse.hour}:{zeit_parse.minute}  = zeit_parse\n{datum}  = datum\n{datum_parse.day}.{datum_parse.month}.{datum_parse.year}  = datum parse"
-        )
+        # print(
+        #     f"{zeit} = zeit\n{zeit_parse.hour}:{zeit_parse.minute}  = zeit_parse\n{datum}  = datum\n{datum_parse.day}.{datum_parse.month}.{datum_parse.year}  = datum parse"
+        # )
 
         Date_final = datetime.combine(
             datum_parse.date(), zeit_parse.time()
