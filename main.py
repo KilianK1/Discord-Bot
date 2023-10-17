@@ -104,7 +104,7 @@ async def add_result(
 
 @client.tree.command(
     name="edit",
-    description="Nutze die Message_ID vom Ergebnis um es zu bearbeiten, leer = nichts ändern"
+    description="Nutze die Message_ID zum editen, leere Felder = nichts ändern"
 )
 @app_commands.describe(
     message_id="Die ID der Nachricht die du bearbeiten willst",
@@ -145,8 +145,8 @@ async def edit_result(
         return
     
     if(datum != "-1"):
-        date = zeit_format(datum, "00:00") # überprüfe format von datum und uhrzeit unabhängig voneinander
-    if(uhrzeit != "-1"):
+        date = zeit_format(datum, "00:00") # überprüfe format von datum und uhrzeit unabhängig voneinander 
+    if(uhrzeit != "-1"):                    # erstelle datetime objekt, welches die relevante veränderung enthält. damit später combine ausgeführt werden kann
         date = zeit_format("01.01.23", uhrzeit)
     else:
         date = zeit_format("01.01.23", "00:00")
@@ -161,7 +161,7 @@ async def edit_result(
         message_id,
 
     )
-    res = result_list.edit(message_id, res, uhrzeit, datum)
+    res = result_list.edit(message_id, res, uhrzeit, datum) #uhrzeit und datum angefügt, zum überprüfen welche values übernommen werden sollen
     await message.edit(
         content=res.toString()
         + f"\nNutze diese Message_ID zum löschen oder bearbeiten deines Ergebnisses: {message_id}"
@@ -170,6 +170,37 @@ async def edit_result(
             "Dein Ergebnis wurde bearbeitet",
             delete_after=30,
         )
+
+
+@client.tree.command(
+    name="delete",
+    description="Nutze die Message_ID vom Ergebnis um es zu löschen"
+)
+@app_commands.describe(
+    message_id="Die ID der Nachricht die du löschen willst",
+)
+async def delete_result(
+    interaction: discord.Interaction,
+    message_id: str,  
+):
+    message_id.strip()  # es schleichen sich schnell führende und endende leerzeichen in userinput -> strip removed diese
+    try:
+        message = await interaction.channel.fetch_message(message_id)
+    except:
+        await interaction.response.send_message(
+            "Etwas ist schiefgelaufen, überprüfe ob deine Messagge_ID stimmt",
+            delete_after=30,
+        )
+        return
+    
+    message.delete()
+
+    result_list.delete(message_id)
+
+    await interaction.response.send_message(
+        content = "Nachricht wurde gelöscht",
+        delete_after = 30
+    ) 
 
 
 
@@ -189,15 +220,10 @@ def zeit_format(datum: str, zeit: str):
         raise Exception("Invalid date given")
 
     try:
-        # print(
-        #     f"{zeit} = zeit\n{zeit_parse.hour}:{zeit_parse.minute}  = zeit_parse\n{datum}  = datum\n{datum_parse.day}.{datum_parse.month}.{datum_parse.year}  = datum parse"
-        # )
-
         Date_final = datetime.combine(
             datum_parse.date(), zeit_parse.time()
         )  # combine date and time into a single object
 
-        #print(Date_final)
 
     except NameError:
         raise Exception("Could not format date")
