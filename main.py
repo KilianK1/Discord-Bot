@@ -78,7 +78,7 @@ async def add_result(
     message = (
         await antwort.fetch()
     )  # message transformiert, so dass ich id rausfinden kann
-    message_id = message.id
+    message_id = str(message.id)
 
     try:
         date_format = zeit_format(datum=datum, zeit=uhrzeit)  # format
@@ -156,6 +156,10 @@ async def edit_result(
         content=res.toString()
         + f"\nNutze diese Message_ID zum löschen oder bearbeiten deines Ergebnisses: {message_id}"
     )
+    await interaction.response.send_message(
+            "Dein Ergebnis wurde bearbeitet",
+            delete_after=30,
+        )
 
 
 
@@ -183,7 +187,7 @@ def zeit_format(datum: str, zeit: str):
             datum_parse.date(), zeit_parse.time()
         )  # combine date and time into a single object
 
-        print(Date_final)
+        #print(Date_final)
 
     except NameError:
         raise Exception("Could not format date")

@@ -58,11 +58,16 @@ def update_dictionary(key, value):
     except:
         print("Error during pickling object (Possibly unsupported):")
 
-def edit(message_id: int, result_edit: result_object.result, uhrzeit, datum): #or maybe pass entire result object? where do I filter which attributes need to be changed?
+def edit(message_id: str, result_edit: result_object.result, uhrzeit, datum): #or maybe pass entire result object? where do I filter which attributes need to be changed?
     
     kw = read_dictionary(message_id)
     liste = read(kw)
-    result = liste[message_id]
+
+    for r in liste:
+        if (r.id == message_id):
+            result = r
+    
+    
     result.update(result_edit, uhrzeit, datum) #check which values need to be changed and edit
     return result
 
@@ -73,6 +78,7 @@ def edit(message_id: int, result_edit: result_object.result, uhrzeit, datum): #o
 def read_dictionary(KW_or_ID):
     try:
         dictionary = read("dictionary")  # open file and return list
+        print(dictionary)
         id_or_kw_return = dictionary[KW_or_ID]
         return id_or_kw_return
     except IOError:
