@@ -1,8 +1,5 @@
 import result_object
 import pickle
-import datetime
-import sqlite3
-
 
 # in the pickle file I always store a list of results
 # when adding a result I first read the list, add the result to the list and then save the new list
@@ -18,20 +15,7 @@ def add(result: result_object.result):
         print("couldnt read file")
         res_list = []  # file doesnt exist so we create a new list
 
-    # print("\nbefore adding new result:")
-    # if res_list:
-    #     for r in res_list:
-    #         print(r.toString())
-    # else:
-    #     print("res_list is empty")
     res_list.append(result)
-
-    # print("\nafter adding new result:")
-    # if res_list:
-    #     for r in res_list:
-    #         print(r.toString())
-    # else:
-    #     print("res_list is empty")
 
     write(res_list, jahr_kalenderWoche)  # write new list with added result to file
 
@@ -45,34 +29,43 @@ def add(result: result_object.result):
 
 
 def update_dictionary(key, value):
-    
     try:
         dictionary = read("dictionary")  # open file and return dictionary
     except IOError:
         raise IOError(
             "Pickle file couldnt be opened. This usually means it doesnt exist"
         )
-    dictionary[key] =  value
+    dictionary[key] = value
     try:
         write(dictionary, "dictionary")
     except:
         print("Error during pickling object (Possibly unsupported):")
 
-def edit(message_id: str, result_edit: result_object.result, uhrzeit, datum): #or maybe pass entire result object? where do I filter which attributes need to be changed?
-    
+
+def edit(
+    message_id: str, 
+    result_edit: result_object.result, uhrzeit, datum
+):  # or maybe pass entire result object? where do I filter which attributes need to be changed?
     kw = read_dictionary(message_id)
     liste = read(kw)
 
     for r in liste:
-        if (r.id == message_id):
+        if r.id == message_id:
             result = r
-    
-    
-    result.update(result_edit, uhrzeit, datum) #check which values need to be changed and edit
+
+    delete(message_id)  # einmal löschen und neu adden falls KW sich geändert hat
+    add(result)
+
     return result
 
 
-# def delete(message_id: str) how do i find the calendar week and the corresponding file without having the datetime object? i dont -> I need to save it in an additional file
+def delete(message_id: str):
+    kw = read_dictionary(message_id)
+    liste = read(kw)
+
+    for r in list(liste):  # iterate over copy so I can delete element
+        if r.id == message_id:
+            liste.remove(r)
 
 
 def read_dictionary(KW_or_ID):
