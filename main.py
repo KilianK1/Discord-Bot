@@ -66,7 +66,9 @@ async def add_result(
     gegner_team.strip()
     liga.strip()
     ergebnis.strip()
-    format.strip()  # es schleichen sich schnell führende und endende leerzeichen in userinput -> strip removed diese
+    format.strip()
+    uhrzeit.strip()
+    datum.strip()  # es schleichen sich schnell führende und endende leerzeichen in userinput -> strip removed diese
 
     await interaction.response.send_message(
         "Bot ist am Arbeiten..."
@@ -125,6 +127,14 @@ async def edit_result(
     ergebnis: str = "-1",
     format: str = "-1",
 ):
+    message_id.strip
+    mein_team.strip()
+    gegner_team.strip()
+    liga.strip()
+    ergebnis.strip()
+    format.strip()
+    uhrzeit.strip()
+    datum.strip()
     try:
         message = await interaction.channel.fetch_message(message_id)
     except:

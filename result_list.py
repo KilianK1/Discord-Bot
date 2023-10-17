@@ -6,6 +6,7 @@ import pickle
 
 
 def add(result: result_object.result):
+    print('executing result_list.add')
     jahr_kalenderWoche = result.date.strftime("%y_%W")
 
     try:
@@ -29,6 +30,7 @@ def add(result: result_object.result):
 
 
 def update_dictionary(key, value):
+    print('executing result_list.update_dictionary')
     try:
         dictionary = read("dictionary")  # open file and return dictionary
     except IOError:
@@ -45,14 +47,18 @@ def update_dictionary(key, value):
 def edit(
     message_id: str, 
     result_edit: result_object.result, uhrzeit, datum
-):  # or maybe pass entire result object? where do I filter which attributes need to be changed?
+):
+    print('executing result_list.edit')
     kw = read_dictionary(message_id)
     liste = read(kw)
 
     for r in liste:
         if r.id == message_id:
+            print(r.toString())
             result = r
+    result.update(result_edit, uhrzeit, datum)
 
+    print(f'result should now be edited: {result.toString()}')
     delete(message_id)  # einmal löschen und neu adden falls KW sich geändert hat
     add(result)
 
@@ -60,18 +66,25 @@ def edit(
 
 
 def delete(message_id: str):
+    print('executing result_list.delete')
     kw = read_dictionary(message_id)
     liste = read(kw)
+
+
+    # for i in range(len(liste) - 1, -1, -1):
+    #     if liste[i].id == message_id:
+    #         del liste[i]
 
     for r in list(liste):  # iterate over copy so I can delete element
         if r.id == message_id:
             liste.remove(r)
+    write(liste, kw)
 
 
 def read_dictionary(KW_or_ID):
+    print(f"read_dictionary {KW_or_ID}")
     try:
         dictionary = read("dictionary")  # open file and return list
-        print(dictionary)
         id_or_kw_return = dictionary[KW_or_ID]
         return id_or_kw_return
     except IOError:
@@ -82,7 +95,7 @@ def read_dictionary(KW_or_ID):
 
 
 def read(file_name: str):
-    print(f"trying to read {file_name}.pickle")
+    print(f" result_list.read {file_name}.pickle")
     try:
         pickle_data = pickle.load(
             open(f"{file_name}.pickle", "rb")
@@ -96,6 +109,7 @@ def read(file_name: str):
 
 
 def write(pickle_data, file_name: str):
+    print(f"trying to write to {file_name}.pickle")
     try:
         pickle.dump(pickle_data, open(f"{file_name}.pickle", "wb"))
     except:

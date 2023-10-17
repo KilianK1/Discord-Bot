@@ -36,14 +36,11 @@ class result:
             self.league = result_edit.league
         if uhrzeit != "-1":
             zeit_parse = datetime.strptime(uhrzeit, "%H:%M")
-            self.date.combine(self.date.date, zeit_parse.time)
+            self.date = self.date.combine(self.date.date(), zeit_parse.time())
         if datum != "-1":
             zeit_parse = datetime.strptime(datum, "%d.%m.%y")
-            self.date.combine(self.date.time, zeit_parse.date)
+            self.date = self.date.combine(self.date.time(), zeit_parse.date())
         if result_edit.result != "-1":
             self.result = result_edit.result
         if result_edit.form != "-1":
             self.form = result_edit.form
-        
-
-# test
