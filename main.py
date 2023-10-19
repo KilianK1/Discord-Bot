@@ -94,17 +94,21 @@ async def add_result(
     res = result_object.result(
         mein_team, gegner_team, date_format, liga, ergebnis, format, message_id
     )  # erstelle result objekt
+    try:
+        result_list.add(res)
+    except:
+        await message.edit(content="Something went wrong", delete_after=30)
+        raise IOError("Somethin went wrong while adding the result")
+        # proper format
     await message.edit(
         content=res.toString()
         + f"\nNutze diese Message_ID zum löschen oder bearbeiten deines Ergebnisses: {message_id}"
     )  # proper format
 
-    result_list.add(res)
-
 
 @client.tree.command(
     name="edit",
-    description="Nutze die Message_ID zum editen, leere Felder = nichts ändern"
+    description="Nutze die Message_ID zum editen, leere Felder = nichts ändern",
 )
 @app_commands.describe(
     message_id="Die ID der Nachricht die du bearbeiten willst",
@@ -143,14 +147,18 @@ async def edit_result(
             delete_after=30,
         )
         return
-    
-    if(datum != "-1"):
-        date = zeit_format(datum, "00:00") # überprüfe format von datum und uhrzeit unabhängig voneinander 
-    if(uhrzeit != "-1"):                    # erstelle datetime objekt, welches die relevante veränderung enthält. damit später combine ausgeführt werden kann
+
+    if datum != "-1":
+        date = zeit_format(
+            datum, "00:00"
+        )  # überprüfe format von datum und uhrzeit unabhängig voneinander
+    if (
+        uhrzeit != "-1"
+    ):  # erstelle datetime objekt, welches die relevante veränderung enthält. damit später combine ausgeführt werden kann
         date = zeit_format("01.01.23", uhrzeit)
     else:
         date = zeit_format("01.01.23", "00:00")
-    
+
     res = result_object.result(
         mein_team,
         gegner_team,
@@ -159,29 +167,36 @@ async def edit_result(
         ergebnis,
         format,
         message_id,
-
     )
-    res = result_list.edit(message_id, res, uhrzeit, datum) #uhrzeit und datum angefügt, zum überprüfen welche values übernommen werden sollen
+    try:
+        res = result_list.edit(
+            message_id, res, uhrzeit, datum
+        )  # uhrzeit und datum angefügt, zum überprüfen welche values übernommen werden sollen
+    except:
+        await interaction.response.send_message(
+            content="Something went wrong", delete_after=30
+        )
+        raise IOError("Somethin went wrong while editing the result")
+
     await message.edit(
         content=res.toString()
         + f"\nNutze diese Message_ID zum löschen oder bearbeiten deines Ergebnisses: {message_id}"
     )
     await interaction.response.send_message(
-            "Dein Ergebnis wurde bearbeitet",
-            delete_after=30,
-        )
+        "Dein Ergebnis wurde bearbeitet",
+        delete_after=30,
+    )
 
 
 @client.tree.command(
-    name="delete",
-    description="Nutze die Message_ID vom Ergebnis um es zu löschen"
+    name="delete", description="Nutze die Message_ID vom Ergebnis um es zu löschen"
 )
 @app_commands.describe(
     message_id="Die ID der Nachricht die du löschen willst",
 )
 async def delete_result(
     interaction: discord.Interaction,
-    message_id: str,  
+    message_id: str,
 ):
     message_id.strip()  # es schleichen sich schnell führende und endende leerzeichen in userinput -> strip removed diese
     try:
@@ -192,16 +207,18 @@ async def delete_result(
             delete_after=30,
         )
         return
+
+    await message.delete()
+    try:
+        result_list.delete(message_id)
+    except:
+        await interaction.response.send_message(content="Something went wrong", delete_after=30)
+        raise IOError("Somethin went wrong while deleting the result")
+
     
-    message.delete()
-
-    result_list.delete(message_id)
-
     await interaction.response.send_message(
-        content = "Nachricht wurde gelöscht",
-        delete_after = 30
-    ) 
-
+        content="Nachricht wurde gelöscht", delete_after=30
+    )
 
 
 def zeit_format(datum: str, zeit: str):
@@ -223,7 +240,6 @@ def zeit_format(datum: str, zeit: str):
         Date_final = datetime.combine(
             datum_parse.date(), zeit_parse.time()
         )  # combine date and time into a single object
-
 
     except NameError:
         raise Exception("Could not format date")
