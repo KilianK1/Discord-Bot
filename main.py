@@ -221,6 +221,31 @@ async def delete_result(
     )
 
 
+async def update_KW_Message(liste, message_id, jahr_KW):
+    channel = client.get_channel(1163162296588185640)       #TODO Hardcode target channel-ID here
+    try:
+        message = await channel.fetch_message(message_id) 
+    except:
+        await channel.send_message(
+            "Etwas ist schiefgelaufen, überprüfe ob deine Messagge_ID stimmt",
+            delete_after=30,
+        )
+        return
+    new_text = f"#KW {jahr_KW}:\n\n" # # ist für Header        TODO kann man hier nach Spiel sortieren? 
+    for x in liste:
+        new_text += x.toString() + '\n'     #für jedes element in liste wird der string angehängt + newline
+    
+    message.edit(content = new_text)
+
+
+async def new_KW_Message():
+    channel = client.get_channel(1163162296588185640)       #TODO Hardcode target channel-ID here
+    
+    message = await channel.send(content= "Processing...")
+    return message.id
+    
+
+
 def zeit_format(datum: str, zeit: str):
     # parse input values to datetime objects according to format given in strptime
     try:

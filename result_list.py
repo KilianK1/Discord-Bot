@@ -1,6 +1,7 @@
 import result_object
 import pickle
 import os.path
+import main
 
 # in the pickle file I always store a list of results
 # when adding a result I first read the list, add the result to the list and then save the new list
@@ -26,10 +27,56 @@ def add(result: result_object.result):
     for r in res_list:
         print(r.toString())
 
+    #these are the things we do to keep everything synced up after a change
     update_dictionary(result.id, jahr_kalenderWoche)
-
+    write_KW_Message(jahr_kalenderWoche)        
     write(res_list, jahr_kalenderWoche)
-    # TODO update or create weekly message in matches and results, also needs to be done for edit and delete
+
+
+def edit(message_id: str, result_edit: result_object.result, uhrzeit, datum):
+    print("executing result_list.edit")
+    kw = read_dictionary(message_id)
+    liste = read(kw)
+
+    for r in liste:
+        if r.id == message_id:
+            print(r.toString())
+            result = r
+    result.update(result_edit, uhrzeit, datum)
+
+    #these are the things we do to keep everything synced up after a change
+    print(f"result should now be edited: {result.toString()}")
+    jahr_kalenderWoche_edited = result.date.strftime("%y_%W")
+    delete(message_id)  # einmal löschen und neu adden falls KW sich geändert hat
+    add(result)
+    write_KW_Message(jahr_kalenderWoche_edited)
+    return result
+
+
+def delete(message_id: str):
+    print("executing result_list.delete")
+    kw = read_dictionary(message_id)
+    liste = read(kw)
+
+    for r in list(liste):  # iterate over copy so I can delete element
+        if r.id == message_id:
+            liste.remove(r)
+    write(liste, kw)
+    write_KW_Message(kw)
+
+
+def write_KW_Message(jahr_kalenderWoche):
+    
+    liste = read(jahr_kalenderWoche)    #liste of results
+    liste.sort(key=lambda x: x.date)    #sort for good measure
+    
+    try:
+        message_ID = read_dictionary(jahr_kalenderWoche) #message_id finden
+    except KeyError:
+        message_ID = main.new_KW_Message() #message wird in der Main geschrieben als platzhalter #Message_id wird returned
+        update_dictionary(jahr_kalenderWoche, message_ID)
+    
+    main.update_KW_Message(liste, message_ID, jahr_kalenderWoche)   #message existiert bereits und message_id wird mitgegeben
 
 
 def update_dictionary(key, value):
@@ -52,39 +99,6 @@ def update_dictionary(key, value):
         print("Error during pickling object (Possibly unsupported):")
 
 
-def edit(message_id: str, result_edit: result_object.result, uhrzeit, datum):
-    print("executing result_list.edit")
-    kw = read_dictionary(message_id)
-    liste = read(kw)
-
-    for r in liste:
-        if r.id == message_id:
-            print(r.toString())
-            result = r
-    result.update(result_edit, uhrzeit, datum)
-
-    print(f"result should now be edited: {result.toString()}")
-    delete(message_id)  # einmal löschen und neu adden falls KW sich geändert hat
-    add(result)
-
-    return result
-
-
-def delete(message_id: str):
-    print("executing result_list.delete")
-    kw = read_dictionary(message_id)
-    liste = read(kw)
-
-    # for i in range(len(liste) - 1, -1, -1):
-    #     if liste[i].id == message_id:
-    #         del liste[i]
-
-    for r in list(liste):  # iterate over copy so I can delete element
-        if r.id == message_id:
-            liste.remove(r)
-    write(liste, kw)
-
-
 def read_dictionary(KW_or_ID):
     print(f"read_dictionary {KW_or_ID}")
     try:
@@ -98,7 +112,7 @@ def read_dictionary(KW_or_ID):
             write(new_dictionary, "gurken\\dictionary")
         else:
             raise IOError(
-                "Pickle file couldnt be opened. It seems to exist but it couldnt be opened"
+                "Pickle file seems to exist but it couldnt be opened"
             )
 
 
