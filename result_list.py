@@ -28,8 +28,7 @@ def add(result: result_object.result):
         print(r.toString())
 
     #these are the things we do to keep everything synced up after a change
-    update_dictionary(result.id, jahr_kalenderWoche)
-    get_KW_Message(jahr_kalenderWoche)        
+    update_dictionary(result.id, jahr_kalenderWoche)       
     write(res_list, jahr_kalenderWoche)
 
 
@@ -65,12 +64,6 @@ def delete(message_id: str):
     
 
 
-def get_KW_Message(jahr_kalenderWoche):
-    liste = read(jahr_kalenderWoche)    #liste of results
-    liste.sort(key=lambda x: x.date)    #sort for good measure
-    return liste
-
-
 def update_dictionary(key, value):
     print("executing result_list.update_dictionary")
     try:
@@ -96,7 +89,7 @@ def update_dictionary(key, value):
 def read_dictionary(KW_or_ID):
     print(f"read_dictionary {KW_or_ID}")
     try:
-        dictionary = read("dictionary")  # open file and return list
+        dictionary = read("dictionary")  # open file and return dict
         id_or_kw_return = dictionary[KW_or_ID]
         return id_or_kw_return
     except IOError:

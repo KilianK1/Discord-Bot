@@ -1,6 +1,5 @@
 from datetime import datetime
 import locale
-import pickle
 import discord
 from discord import app_commands
 import json
@@ -14,7 +13,7 @@ with open("configuration.json", "r") as config:
     token = data["token"]
 
 locale.setlocale(locale.LC_ALL, "de_DE")
-
+MATCHES_AND_RESULTS = discord.Object(id=1163162296588185640)       #TODO Hardcode matches and results channel-ID here
 MY_GUILD = discord.Object(id=1162339357106131028)
 
 
@@ -101,7 +100,7 @@ async def add_result(
         raise IOError("Somethin went wrong while adding the result")
         # proper format
     await message.edit(
-        content=res.toString()
+        content = res.toString()
         + f"\nNutze diese Message_ID zum löschen oder bearbeiten deines Ergebnisses: {message_id}"
     )  # proper format
     jahr_kalenderWoche = res.date.strftime("%y_%W")
@@ -194,7 +193,7 @@ async def edit_result(
     )
     #Which kw is message in after editing
     jahr_kalenderWoche = res.date.strftime("%y_%W")
-    
+
     #here we update the KW messages
     await update_KW_Message(jahr_kalenderWoche)
 
@@ -239,8 +238,8 @@ async def delete_result(
 
 
 async def update_KW_Message(jahr_KW):
-    channel = client.get_channel(1163162296588185640)       #TODO Hardcode matches and results channel-ID here
-    
+    channel = client.get_channel(MATCHES_AND_RESULTS)
+
     liste = result_list.read(jahr_KW)
     #need to get all results from this week -> read corresponding file
     
@@ -248,13 +247,7 @@ async def update_KW_Message(jahr_KW):
     try:
         message_ID = result_list.read_dictionary(jahr_KW) #message_id finden
     except KeyError:
-        print("KW_message was not found, writing new one")
-
-        #message wird geschrieben als platzhalter #Message_id wird returned
-        message = await channel.send(content= f"**{jahr_KW}:**")
-        message_ID = message.id 
-        result_list.update_dictionary(jahr_KW, message_ID)
-    # find message ID or create new message if doesnt exist yet
+        message_ID = await create_KW_message(jahr_KW)
     
     try:
         message = await channel.fetch_message(message_ID) 
@@ -272,7 +265,41 @@ async def update_KW_Message(jahr_KW):
     
     await message.edit(content = new_text)
     
+async def create_KW_message(jahr_KW):
+    channel = client.get_channel(MATCHES_AND_RESULTS)
+    
+    print("KW_message was not found, writing new one")
 
+    #read entry "kw_liste" which contains a list of all existing weekly messages
+    kw_liste = result_list.read_dictionary("kw_liste")
+
+    index = 0
+    for x in kw_liste:
+        if(x < jahr_KW):
+            index += 1
+    #find at which index I need to insert the message, am I stupid? is there no easier way to do this?
+    
+    kw_liste.insert(index, jahr_KW)
+    result_list.update_dictionary("kw_liste", kw_liste)
+
+    #message wird geschrieben als platzhalter
+    message = await channel.send(content= f"**{jahr_KW}:**")
+    message_ID = message.id 
+    result_list.update_dictionary(jahr_KW, message_ID)
+    #creating a new KW message we add it to the list
+
+
+    #delete and rewrite all following weekly messages to restore order
+    for x in range(index + 1 , len(kw_liste)):
+        old_message_id = result_list.read_dictionary(kw_liste[x])
+        old_kw_message = await channel.fetch_message(id = old_message_id)
+        await old_kw_message.delete
+        new_kw_message = await channel.send(f"**{kw_liste[x]}:**") #New Placeholder message
+        result_list.update_dictionary(kw_liste[x], new_kw_message.id) #enter new Message_id into dict
+        update_KW_Message(kw_liste[x]) #message gets properly written here
+    
+
+    return message_ID
 
 def zeit_format(datum: str, zeit: str):
     # parse input values to datetime objects according to format given in strptime
