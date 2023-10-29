@@ -1,7 +1,7 @@
 import result_object
 import pickle
 import os.path
-import main
+
 
 # in the pickle file I always store a list of results
 # when adding a result I first read the list, add the result to the list and then save the new list
@@ -19,7 +19,7 @@ def add(result: result_object.result):
         res_list = []  # file doesnt exist so we create a new list
 
     res_list.append(result)
-
+    write(res_list, jahr_kalenderWoche)
       # write new list with added result to file
 
     res_list.sort(key=lambda x: x.date)  # compare list items by date and sort them
@@ -29,7 +29,7 @@ def add(result: result_object.result):
 
     #these are the things we do to keep everything synced up after a change
     update_dictionary(result.id, jahr_kalenderWoche)
-    write_KW_Message(jahr_kalenderWoche)        
+    get_KW_Message(jahr_kalenderWoche)        
     write(res_list, jahr_kalenderWoche)
 
 
@@ -46,10 +46,9 @@ def edit(message_id: str, result_edit: result_object.result, uhrzeit, datum):
 
     #these are the things we do to keep everything synced up after a change
     print(f"result should now be edited: {result.toString()}")
-    jahr_kalenderWoche_edited = result.date.strftime("%y_%W")
+    # jahr_kalenderWoche_edited = result.date.strftime("%y_%W")
     delete(message_id)  # einmal löschen und neu adden falls KW sich geändert hat
     add(result)
-    write_KW_Message(jahr_kalenderWoche_edited)
     return result
 
 
@@ -62,21 +61,14 @@ def delete(message_id: str):
         if r.id == message_id:
             liste.remove(r)
     write(liste, kw)
-    write_KW_Message(kw)
-
-
-def write_KW_Message(jahr_kalenderWoche):
+    return kw
     
+
+
+def get_KW_Message(jahr_kalenderWoche):
     liste = read(jahr_kalenderWoche)    #liste of results
     liste.sort(key=lambda x: x.date)    #sort for good measure
-    
-    try:
-        message_ID = read_dictionary(jahr_kalenderWoche) #message_id finden
-    except KeyError:
-        message_ID = main.new_KW_Message() #message wird in der Main geschrieben als platzhalter #Message_id wird returned
-        update_dictionary(jahr_kalenderWoche, message_ID)
-    
-    main.update_KW_Message(liste, message_ID, jahr_kalenderWoche)   #message existiert bereits und message_id wird mitgegeben
+    return liste
 
 
 def update_dictionary(key, value):
@@ -99,6 +91,8 @@ def update_dictionary(key, value):
         print("Error during pickling object (Possibly unsupported):")
 
 
+#dictionary saves for all "KWs" a corresponding message id
+#dictionary also contains for all message_ids of individual results the corresponding kw
 def read_dictionary(KW_or_ID):
     print(f"read_dictionary {KW_or_ID}")
     try:

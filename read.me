@@ -1,9 +1,18 @@
+Figuring out:  
+    how to manage all KW messages after edit and deletes, keep them all in order.
+        - 1 message per week? or 1 BIG message for everything?
+        - weekly messages would need to be deleted or kept empty. might result in big blank spaces if there are multiple weeks in a row without matches
+        - if we dont keep empty weekly messages and then add a new KW in between existing KWs, we would have to delete all newer KWs and rewrite -> this sucks
+
+        -> Keep a list with all KW Messages in order?  YES    -> Allows us to figure out where we currently are
+        -> when a new KW is created, also create all missing elements in between? Probably?
+        -> Update all elements after the one we added?    for weekly messages this would mean deleting and readding or keeping empty messages
+
+
 Currently doing:
     Having bot maintain and create weekly messages
 
 Should definetly do:
-    figure out what to do if later KW message is created before more current message -> restore order in channel?, keep "empty" messages around as placeholders?
-
     Change pickle to json
     clean up xdd
     remove format time function from main -> maybe to result_object
@@ -14,9 +23,15 @@ Want to do:
     clean up comments
     Input möglich von verschiedenen channels aus?
     Verschiedene Channels -> Game wird in result gespeichert und message wird nach games getrennt -> Gruppiert erst nach games und sortiert erst dann die Gruppen nach Zeit
-
-
+    Bessere möglichkeit um result zu editen? User replied auf messsage oder ähnliches? Hab bisher nichts gefunden
 
 VERY OPTIONAL:
     Message Markiert matches die aktuell laufen
     Bot notified result author wenn ein Match termin rum ist und kein Result eingetragen wurde
+
+
+
+ERRORS THAT CAN HAPPEN:
+    deleting a bot message manually somewhere can desync data the bot has and whats actually on the server 
+        -> No idea how to solve if files were json files, admin could go into files and restore sync manually
+        maybe let bot delete all data in corresponding file if he cant find message anymore
