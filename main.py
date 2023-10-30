@@ -265,13 +265,19 @@ async def update_KW_Message(jahr_KW):
     
     await message.edit(content = new_text)
     
+
 async def create_KW_message(jahr_KW):
     channel = client.get_channel(MATCHES_AND_RESULTS)
     
     print("KW_message was not found, writing new one")
 
     #read entry "kw_liste" which contains a list of all existing weekly messages
-    kw_liste = result_list.read_dictionary("kw_liste")
+    
+    try:
+        kw_liste = result_list.read_dictionary("kw_liste")
+    except KeyError:
+        kw_liste = []
+    #create new liste if it didnt exist before
 
     index = 0
     for x in kw_liste:
