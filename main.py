@@ -13,7 +13,7 @@ with open("configuration.json", "r") as config:
     token = data["token"]
 
 locale.setlocale(locale.LC_ALL, "de_DE")
-MATCHES_AND_RESULTS = discord.Object(id=1163162296588185640)       #TODO Hardcode matches and results channel-ID here
+MATCHES_AND_RESULTS = 1163162296588185640       #TODO Hardcode matches and results channel-ID here
 MY_GUILD = discord.Object(id=1162339357106131028)
 
 
@@ -258,7 +258,9 @@ async def update_KW_Message(jahr_KW):
         )
         return
     
-    new_text = f"**KW {jahr_KW}:**\n\n" # # ist für Header        TODO kann man hier nach Spiel sortieren? 
+    result_list.update_dictionary(jahr_KW, message_ID)
+
+    new_text = f"-----------------------------\n**KW {jahr_KW}:**\n\n" # # ist für Header        TODO kann man hier nach Spiel sortieren? 
     for x in liste:
         new_text += x.toString() + '\n'     #für jedes element in liste wird der string angehängt + newline
         #durch .toKWString ersetzen wenn anderes format gewünscht
@@ -298,11 +300,11 @@ async def create_KW_message(jahr_KW):
     #delete and rewrite all following weekly messages to restore order
     for x in range(index + 1 , len(kw_liste)):
         old_message_id = result_list.read_dictionary(kw_liste[x])
-        old_kw_message = await channel.fetch_message(id = old_message_id)
-        await old_kw_message.delete
+        old_kw_message = await channel.fetch_message(old_message_id)
+        await old_kw_message.delete()
         new_kw_message = await channel.send(f"**{kw_liste[x]}:**") #New Placeholder message
         result_list.update_dictionary(kw_liste[x], new_kw_message.id) #enter new Message_id into dict
-        update_KW_Message(kw_liste[x]) #message gets properly written here
+        await update_KW_Message(kw_liste[x]) #message gets properly written here
     
 
     return message_ID

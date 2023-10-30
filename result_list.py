@@ -13,9 +13,8 @@ def add(result: result_object.result):
 
     try:
         res_list = read(jahr_kalenderWoche)
-        print("did read file")
     except:
-        print("couldnt read file")
+        print(f"couldnt read file: {jahr_kalenderWoche}")
         res_list = []  # file doesnt exist so we create a new list
 
     res_list.append(result)
@@ -23,7 +22,7 @@ def add(result: result_object.result):
       # write new list with added result to file
 
     res_list.sort(key=lambda x: x.date)  # compare list items by date and sort them
-    print("after sorting result list:")
+    print(f"result list for {jahr_kalenderWoche}:")
     for r in res_list:
         print(r.toString())
 
@@ -45,7 +44,6 @@ def edit(message_id: str, result_edit: result_object.result, uhrzeit, datum):
 
     #these are the things we do to keep everything synced up after a change
     print(f"result should now be edited: {result.toString()}")
-    # jahr_kalenderWoche_edited = result.date.strftime("%y_%W")
     delete(message_id)  # einmal löschen und neu adden falls KW sich geändert hat
     add(result)
     return result
@@ -65,7 +63,7 @@ def delete(message_id: str):
 
 
 def update_dictionary(key, value):
-    print("executing result_list.update_dictionary")
+    print(f"executing update_dictionary(key: {key}, value: {value})")
     try:
         dictionary = read("dictionary")  # open file and return dictionary
     except IOError:
@@ -87,11 +85,9 @@ def update_dictionary(key, value):
 #dictionary saves for all "KWs" a corresponding message id
 #dictionary also contains for all message_ids of individual results the corresponding kw
 def read_dictionary(KW_or_ID):
-    print(f"read_dictionary {KW_or_ID}")
+    print(f"read_dictionary at key: {KW_or_ID}")
     try:
         dictionary = read("dictionary")  # open file and return dict
-        id_or_kw_return = dictionary[KW_or_ID]
-        return id_or_kw_return
     except IOError:
         print(f"file dictionary.pickle didnt exist yet")
         if not os.path.isfile("gurken\\dictionary"):
@@ -101,6 +97,12 @@ def read_dictionary(KW_or_ID):
             raise IOError(
                 "Pickle file seems to exist but it couldnt be opened"
             )
+    try:
+        id_or_kw_return = dictionary[KW_or_ID]
+    except KeyError:
+        print(f"Key {KW_or_ID} is not yet in Dictionary")
+        raise KeyError()
+    return id_or_kw_return
 
 
 def read(file_name: str):
@@ -118,7 +120,7 @@ def read(file_name: str):
 
 
 def write(pickle_data, file_name: str):
-    print(f"trying to write to gurken\{file_name}.pickle")
+    print(f"writing to gurken\{file_name}.pickle")
     try:
         pickle.dump(pickle_data, open(f"gurken\\{file_name}.pickle", "wb"))
     except:
