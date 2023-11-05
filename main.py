@@ -13,7 +13,9 @@ with open("configuration.json", "r") as config:
     token = data["token"]
 
 locale.setlocale(locale.LC_ALL, "de_DE")
-MATCHES_AND_RESULTS = 1163162296588185640       #TODO Hardcode matches and results channel-ID here
+MATCHES_AND_RESULTS = (
+    1163162296588185640  # TODO Hardcode matches and results channel-ID here
+)
 MY_GUILD = discord.Object(id=1162339357106131028)
 
 
@@ -100,11 +102,11 @@ async def add_result(
         raise IOError("Somethin went wrong while adding the result")
         # proper format
     await message.edit(
-        content = res.toString()
+        content=res.toString()
         + f"\nNutze diese Message_ID zum löschen oder bearbeiten deines Ergebnisses: {message_id}"
     )  # proper format
     jahr_kalenderWoche = res.date.strftime("%y_%W")
-    #here we update the KW messages
+    # here we update the KW messages
     await update_KW_Message(jahr_kalenderWoche)
 
 
@@ -170,9 +172,9 @@ async def edit_result(
         format,
         message_id,
     )
-    #find in which KW message was before edit
+    # find in which KW message was before edit
     old_jahrKW = result_list.read_dictionary(message_id)
-    
+
     try:
         res = result_list.edit(
             message_id, res, uhrzeit, datum
@@ -191,16 +193,15 @@ async def edit_result(
         "Dein Ergebnis wurde bearbeitet",
         delete_after=30,
     )
-    #Which kw is message in after editing
+    # Which kw is message in after editing
     jahr_kalenderWoche = res.date.strftime("%y_%W")
 
-    #here we update the KW messages
+    # here we update the KW messages
     await update_KW_Message(jahr_kalenderWoche)
 
-    if(jahr_kalenderWoche != old_jahrKW):
-        #if KW was changed during edit we need to update both messages
+    if jahr_kalenderWoche != old_jahrKW:
+        # if KW was changed during edit we need to update both messages
         await update_KW_Message(old_jahrKW)
-
 
 
 @client.tree.command(
@@ -213,7 +214,7 @@ async def delete_result(
     interaction: discord.Interaction,
     message_id: str,
 ):
-    message_id.strip()  #führende und endende leerzeichen in userinput -> strip removed diese
+    message_id.strip()  # führende und endende leerzeichen in userinput -> strip removed diese
     try:
         message = await interaction.channel.fetch_message(message_id)
     except:
@@ -227,10 +228,11 @@ async def delete_result(
     try:
         kw = result_list.delete(message_id)
     except:
-        await interaction.response.send_message(content="Something went wrong", delete_after=30)
+        await interaction.response.send_message(
+            content="Something went wrong", delete_after=30
+        )
         raise IOError("Somethin went wrong while deleting the result")
 
-    
     await interaction.response.send_message(
         content="Nachricht wurde gelöscht", delete_after=30
     )
@@ -241,73 +243,78 @@ async def update_KW_Message(jahr_KW):
     channel = client.get_channel(MATCHES_AND_RESULTS)
 
     liste = result_list.read(jahr_KW)
-    #need to get all results from this week -> read corresponding file
-    
-    #Do I need a new message or does it exist? create it if doesnt exist
+    # need to get all results from this week -> read corresponding file
+
+    # Do I need a new message or does it exist? create it if doesnt exist
     try:
-        message_ID = result_list.read_dictionary(jahr_KW) #message_id finden
+        message_ID = result_list.read_dictionary(jahr_KW)  # message_id finden
     except KeyError:
         message_ID = await create_KW_message(jahr_KW)
-    
+
     try:
-        message = await channel.fetch_message(message_ID) 
+        message = await channel.fetch_message(message_ID)
     except:
         await channel.send_message(
             "Etwas ist schiefgelaufen, KW Messagge wurde nicht gefunden",
             delete_after=30,
         )
         return
-    
+
     result_list.update_dictionary(jahr_KW, message_ID)
 
-    new_text = f"-----------------------------\n**KW {jahr_KW}:**\n\n" # # ist für Header        TODO kann man hier nach Spiel sortieren? 
+    new_text = f"-----------------------------\n**KW {jahr_KW}:**\n\n"  # # ist für Header        TODO kann man hier nach Spiel sortieren?
     for x in liste:
-        new_text += x.toString() + '\n'     #für jedes element in liste wird der string angehängt + newline
-        #durch .toKWString ersetzen wenn anderes format gewünscht
-    
-    await message.edit(content = new_text)
-    
+        new_text += (
+            x.toString() + "\n"
+        )  # für jedes element in liste wird der string angehängt + newline
+        # durch .toKWString ersetzen wenn anderes format gewünscht
+
+    await message.edit(content=new_text)
+
 
 async def create_KW_message(jahr_KW):
     channel = client.get_channel(MATCHES_AND_RESULTS)
-    
+
     print("KW_message was not found, writing new one")
 
-    #read entry "kw_liste" which contains a list of all existing weekly messages
-    
+    # read entry "kw_liste" which contains a list of all existing weekly messages
+
     try:
         kw_liste = result_list.read_dictionary("kw_liste")
     except KeyError:
         kw_liste = []
-    #create new liste if it didnt exist before
+    # create new liste if it didnt exist before
 
     index = 0
     for x in kw_liste:
-        if(x < jahr_KW):
+        if x < jahr_KW:
             index += 1
-    #find at which index I need to insert the message, am I stupid? is there no easier way to do this?
-    
+    # find at which index I need to insert the message, am I stupid? is there no easier way to do this?
+
     kw_liste.insert(index, jahr_KW)
     result_list.update_dictionary("kw_liste", kw_liste)
 
-    #message wird geschrieben als platzhalter
-    message = await channel.send(content= f"**{jahr_KW}:**")
-    message_ID = message.id 
+    # message wird geschrieben als platzhalter
+    message = await channel.send(content=f"**{jahr_KW}:**")
+    message_ID = message.id
     result_list.update_dictionary(jahr_KW, message_ID)
-    #creating a new KW message we add it to the list
+    # creating a new KW message we add it to the list
 
-
-    #delete and rewrite all following weekly messages to restore order
-    for x in range(index + 1 , len(kw_liste)):
+    # delete and rewrite all following weekly messages to restore order
+    for x in range(index + 1, len(kw_liste)):
         old_message_id = result_list.read_dictionary(kw_liste[x])
         old_kw_message = await channel.fetch_message(old_message_id)
         await old_kw_message.delete()
-        new_kw_message = await channel.send(f"**{kw_liste[x]}:**") #New Placeholder message
-        result_list.update_dictionary(kw_liste[x], new_kw_message.id) #enter new Message_id into dict
-        await update_KW_Message(kw_liste[x]) #message gets properly written here
-    
+        new_kw_message = await channel.send(
+            f"**{kw_liste[x]}:**"
+        )  # New Placeholder message
+        result_list.update_dictionary(
+            kw_liste[x], new_kw_message.id
+        )  # enter new Message_id into dict
+        await update_KW_Message(kw_liste[x])  # message gets properly written here
 
     return message_ID
+
 
 def zeit_format(datum: str, zeit: str):
     # parse input values to datetime objects according to format given in strptime
@@ -326,7 +333,7 @@ def zeit_format(datum: str, zeit: str):
 
     try:
         Date_final = datetime.combine(
-        datum_parse.date(), zeit_parse.time()
+            datum_parse.date(), zeit_parse.time()
         )  # combine date and time into a single object
 
     except NameError:

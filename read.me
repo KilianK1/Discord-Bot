@@ -1,35 +1,30 @@
-Figuring out:  
+What to do?  
     how to manage all KW messages after edit and deletes, keep them all in order.
         - 1 message per week? or 1 BIG message for everything?
-        - weekly messages would need to be deleted or kept empty? -> no can be done better.
-        - if we dont keep empty weekly messages and then add a new KW in between existing KWs, we would have to delete all newer KWs and rewrite -> this sucks
+        - if we dont keep empty weekly messages? or
+        - add a new KW in between existing KWs, we would have to delete all newer KWs and rewrite
 
-        -> Keep a list with all KW Messages in order?  YES    -> Allows us to figure out where we currently are
         -> when a new KW is created, also create all missing elements in between? Probably?
         -> Update all elements after the one we added?    for weekly messages this would mean deleting and readding or keeping empty messages
 
-Currently doing:
-    Having bot maintain and create weekly messages
 
-Should definetly do:
-    change kw lists to dictionaries, can dict be sorted by datetime like I did for list? probably
-    Change pickle to json
+Clean ups?:
+    change kw lists to dictionaries, does this even have advantages?
+    Change pickle to json -> change result objects to lists or dicts? is easier for json...
     clean up xdd
     remove format time function from main -> maybe to result_object
     check all kinds of edge cases: e.g clear a list of all entries, what happens?
     remove all print() debug shit and replace with actually useful stuff
 
 Want to do:
-    clean up comments
-    Input möglich von verschiedenen channels aus?
+    Input möglich von verschiedenen channels aus
     Verschiedene Channels -> Game wird in result gespeichert und message wird nach games getrennt -> Gruppiert erst nach games und sortiert erst dann die Gruppen nach Zeit
-    Bessere möglichkeit um result zu editen? User replied auf messsage oder ähnliches? Hab bisher nichts gefunden
 
-VERY OPTIONAL:
-    Message Markiert matches die aktuell laufen
+OPTIONAL Features:
+    Markiert matches die aktuell laufen
     Bot notified result author wenn ein Match termin rum ist und kein Result eingetragen wurde
-
-
+    Automated ?Yearly/Monthly/Weekly? reports on amount of matches played and other stats etc.
+    Bessere möglichkeit um result zu editen? User replied auf messsage oder ähnliches? Hab bisher nichts gefunden
 
 ERRORS THAT CAN HAPPEN:
     deleting a bot message manually somewhere can desync data the bot has and whats actually on the server 

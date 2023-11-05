@@ -19,15 +19,15 @@ def add(result: result_object.result):
 
     res_list.append(result)
     write(res_list, jahr_kalenderWoche)
-      # write new list with added result to file
+    # write new list with added result to file
 
     res_list.sort(key=lambda x: x.date)  # compare list items by date and sort them
     print(f"result list for {jahr_kalenderWoche}:")
     for r in res_list:
         print(r.toString())
 
-    #these are the things we do to keep everything synced up after a change
-    update_dictionary(result.id, jahr_kalenderWoche)       
+    # these are the things we do to keep everything synced up after a change
+    update_dictionary(result.id, jahr_kalenderWoche)
     write(res_list, jahr_kalenderWoche)
 
 
@@ -42,7 +42,7 @@ def edit(message_id: str, result_edit: result_object.result, uhrzeit, datum):
             result = r
     result.update(result_edit, uhrzeit, datum)
 
-    #these are the things we do to keep everything synced up after a change
+    # these are the things we do to keep everything synced up after a change
     print(f"result should now be edited: {result.toString()}")
     delete(message_id)  # einmal löschen und neu adden falls KW sich geändert hat
     add(result)
@@ -59,7 +59,6 @@ def delete(message_id: str):
             liste.remove(r)
     write(liste, kw)
     return kw
-    
 
 
 def update_dictionary(key, value):
@@ -82,8 +81,8 @@ def update_dictionary(key, value):
         print("Error during pickling object (Possibly unsupported):")
 
 
-#dictionary saves for all "KWs" a corresponding message id
-#dictionary also contains for all message_ids of individual results the corresponding kw
+# dictionary saves for all "KWs" a corresponding message id
+# dictionary also contains for all message_ids of individual results the corresponding kw
 def read_dictionary(KW_or_ID):
     print(f"read_dictionary at key: {KW_or_ID}")
     try:
@@ -94,9 +93,7 @@ def read_dictionary(KW_or_ID):
             new_dictionary = {}  # creating a dictionary because it didnt exist yet
             write(new_dictionary, "gurken\\dictionary")
         else:
-            raise IOError(
-                "Pickle file seems to exist but it couldnt be opened"
-            )
+            raise IOError("Pickle file seems to exist but it couldnt be opened")
     try:
         id_or_kw_return = dictionary[KW_or_ID]
     except KeyError:
