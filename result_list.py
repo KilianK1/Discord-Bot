@@ -1,6 +1,7 @@
 import result_object
 import pickle
 import os.path
+import jsonpickle
 
 
 # in the pickle file I always store a list of results
@@ -89,9 +90,9 @@ def read_dictionary(KW_or_ID):
         dictionary = read("dictionary")  # open file and return dict
     except IOError:
         print(f"file dictionary.pickle didnt exist yet")
-        if not os.path.isfile("gurken\\dictionary"):
+        if not os.path.isfile("gurken\\dictionary"): #TODO not good because not platform independetn
             new_dictionary = {}  # creating a dictionary because it didnt exist yet
-            write(new_dictionary, "gurken\\dictionary")
+            write(new_dictionary, "dictionary")
         else:
             raise IOError("Pickle file seems to exist but it couldnt be opened")
     try:
@@ -103,12 +104,13 @@ def read_dictionary(KW_or_ID):
 
 
 def read(file_name: str):
+    path = os.path.join('gurken', file_name + '.json')
     print(f" result_list.read gurken\{file_name}.pickle")
     try:
-        pickle_data = pickle.load(
-            open(f"gurken\\{file_name}.pickle", "rb")
-        )  # open file and return whats inside
-        return pickle_data
+        file = open(path, "r")
+        json_str = file.readline()
+        # open file and return whats inside
+        return jsonpickle.decode(json_str, keys=True)
     except IOError:
         print(f"file gurken\{file_name}.pickle does not exist yet")
         raise IOError(
@@ -117,9 +119,12 @@ def read(file_name: str):
 
 
 def write(pickle_data, file_name: str):
+    path = os.path.join('gurken', file_name + '.json')
+    json_str = jsonpickle.encode(pickle_data, keys=True)
     print(f"writing to gurken\{file_name}.pickle")
     try:
-        pickle.dump(pickle_data, open(f"gurken\\{file_name}.pickle", "wb"))
+        file = open(path, "w")
+        file.write(json_str)
     except:
         print("Error during pickling object (Possibly unsupported):")
 
