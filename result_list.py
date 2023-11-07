@@ -65,17 +65,19 @@ def update_dictionary(key, value):
     try:
         dictionary = read("dictionary")  # open file and return dictionary
     except IOError:
-        if not os.path.exists("gurken\\dictionary"):
+        path = os.path.join('gurken', 'dictionary.json')
+        if not os.path.exists(path):
             new_dictionary = {}  # creating a dictionary because it didnt exist yet
-            write(new_dictionary, "gurken\\dictionary")
+            write(new_dictionary, "dictionary")
             dictionary = new_dictionary
         else:
             raise IOError(
                 "json file couldnt be opened. It seems to exist but it couldnt be opened"
             )
     dictionary[key] = value
+    sorted_dict = dict(sorted(dictionary.items()))
     try:
-        write(dictionary, "dictionary")
+        write(sorted_dict, "dictionary")
     except:
         print("Error during pickling object (Possibly unsupported):")
 
