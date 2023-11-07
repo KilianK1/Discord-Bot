@@ -261,8 +261,6 @@ async def update_KW_Message(jahr_KW):
         )
         return
 
-    result_list.update_dictionary(jahr_KW, message_ID)
-
     new_text = f"-----------------------------\n**KW {jahr_KW}:**\n\n"  # # ist für Header        TODO kann man hier nach Spiel sortieren?
     for x in liste:
         new_text += (
@@ -277,8 +275,6 @@ async def update_KW_Message(jahr_KW):
 async def create_KW_message(jahr_KW):
     print(f'starting main.create_KW_Message for KW: {jahr_KW}\n')
     channel = client.get_channel(MATCHES_AND_RESULTS)
-
-    print("KW_message was not found, writing new one")
 
     # read entry "kw_liste" which contains a list of all existing weekly messages
 

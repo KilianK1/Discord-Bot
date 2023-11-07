@@ -15,12 +15,9 @@ def add(result: result_object.result):
     try:
         res_list = read(jahr_kalenderWoche)
     except:
-        print(f"couldnt read file: {jahr_kalenderWoche}")
         res_list = []  # file doesnt exist so we create a new list
 
     res_list.append(result)
-    write(res_list, jahr_kalenderWoche)
-    # write new list with added result to file
 
     res_list.sort(key=lambda x: x.date)  # compare list items by date and sort them
     print(f"result list for {jahr_kalenderWoche}:")
