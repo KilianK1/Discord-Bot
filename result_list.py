@@ -28,8 +28,9 @@ def add(result: result_object.result):
         print(r.toString())
 
     # these are the things we do to keep everything synced up after a change
-    update_dictionary(result.id, jahr_kalenderWoche)
+    
     write(res_list, jahr_kalenderWoche)
+    print('finished result_list.add\n')
 
 
 def edit(message_id: str, result_edit: result_object.result, uhrzeit, datum):
@@ -73,7 +74,7 @@ def update_dictionary(key, value):
             dictionary = new_dictionary
         else:
             raise IOError(
-                "Pickle file couldnt be opened. It seems to exist but it couldnt be opened"
+                "json file couldnt be opened. It seems to exist but it couldnt be opened"
             )
     dictionary[key] = value
     try:
@@ -89,12 +90,13 @@ def read_dictionary(KW_or_ID):
     try:
         dictionary = read("dictionary")  # open file and return dict
     except IOError:
-        print(f"file dictionary.pickle didnt exist yet")
-        if not os.path.isfile("gurken\\dictionary"): #TODO not good because not platform independetn
+        path = os.path.join('gurken', 'dictionary.json')
+        print(f"file dictionary.json didnt exist yet")
+        if not os.path.isfile(path):
             new_dictionary = {}  # creating a dictionary because it didnt exist yet
             write(new_dictionary, "dictionary")
         else:
-            raise IOError("Pickle file seems to exist but it couldnt be opened")
+            raise IOError("json file seems to exist but it couldnt be opened")
     try:
         id_or_kw_return = dictionary[KW_or_ID]
     except KeyError:
@@ -102,26 +104,25 @@ def read_dictionary(KW_or_ID):
         raise KeyError()
     return id_or_kw_return
 
-
 def read(file_name: str):
     path = os.path.join('gurken', file_name + '.json')
-    print(f" result_list.read gurken\{file_name}.pickle")
+    print(f" result_list.read gurken\{file_name}.json")
     try:
         file = open(path, "r")
-        json_str = file.readline()
+        json_str = file.read()
         # open file and return whats inside
         return jsonpickle.decode(json_str, keys=True)
     except IOError:
-        print(f"file gurken\{file_name}.pickle does not exist yet")
+        print(f"file gurken\{file_name}.json does not exist yet")
         raise IOError(
-            "Pickle file couldnt be opened. This usually means it doesnt exist"
+            "json file couldnt be opened. This usually means it doesnt exist"
         )
 
 
 def write(pickle_data, file_name: str):
     path = os.path.join('gurken', file_name + '.json')
-    json_str = jsonpickle.encode(pickle_data, keys=True)
-    print(f"writing to gurken\{file_name}.pickle")
+    json_str = jsonpickle.encode(pickle_data, keys=True, indent = 4)
+    print(f"writing to gurken\{file_name}.json")
     try:
         file = open(path, "w")
         file.write(json_str)

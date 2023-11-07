@@ -240,6 +240,7 @@ async def delete_result(
 
 
 async def update_KW_Message(jahr_KW):
+    print(f'starting main.update_KW_Message for KW: {jahr_KW}\n')
     channel = client.get_channel(MATCHES_AND_RESULTS)
 
     liste = result_list.read(jahr_KW)
@@ -270,9 +271,11 @@ async def update_KW_Message(jahr_KW):
         # durch .toKWString ersetzen wenn anderes format gewünscht
 
     await message.edit(content=new_text)
+    print(f'finished main.update_KW_Message for KW: {jahr_KW}\n')
 
 
 async def create_KW_message(jahr_KW):
+    print(f'starting main.create_KW_Message for KW: {jahr_KW}\n')
     channel = client.get_channel(MATCHES_AND_RESULTS)
 
     print("KW_message was not found, writing new one")
@@ -312,7 +315,7 @@ async def create_KW_message(jahr_KW):
             kw_liste[x], new_kw_message.id
         )  # enter new Message_id into dict
         await update_KW_Message(kw_liste[x])  # message gets properly written here
-
+    print(f'finished main.create_KW_Message for KW: {jahr_KW}\n')
     return message_ID
 
 

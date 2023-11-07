@@ -1,5 +1,5 @@
 /.vscode
 /Cogs
 /__pycache__
-*.pickle
-!dictionary.pickle
+*.json
+!dictionary.json

@@ -26,7 +26,7 @@ class result:
         )  # datetime to string format
         text = f"**{self.league}**\n**{datestring}:** {self.me} {self.result} {self.enemy}  {self.form}"
         return text
-    
+
 
     # this will be needed for formatting of weekly messages, whenever i feel like doing that
     # def toKWString(self):
