@@ -7,15 +7,12 @@ What to do?
         -> when a new KW is created, also create all missing elements in between? Probably?
         -> Update all elements after the one we added?    for weekly messages this would mean deleting and readding or keeping empty messages
 
+Edge case: clear a list of all entries, what happens? -> need to delete list and corresponding kw message
 
 Clean ups?:
-    change kw lists to dictionaries, does this even have advantages?
-    Change pickle to json -> change result objects to lists or dicts? is easier for json...
-    clean up xdd
     remove format time function from main -> maybe to result_object
-    check all kinds of edge cases: e.g clear a list of all entries, what happens?
-    remove all print() debug shit and replace with actually useful stuff
-
+    check all kinds of edge cases
+    
 Want to do:
     Input möglich von verschiedenen channels aus
     Verschiedene Channels -> Game wird in result gespeichert und message wird nach games getrennt -> Gruppiert erst nach games und sortiert erst dann die Gruppen nach Zeit

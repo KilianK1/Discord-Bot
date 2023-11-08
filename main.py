@@ -63,6 +63,8 @@ async def add_result(
     ergebnis: str = "0 - 0",
     format: str = "",
 ):
+    print("\nadd_result was called\n")
+
     mein_team.strip()
     gegner_team.strip()
     liga.strip()
@@ -107,7 +109,7 @@ async def add_result(
     )  # proper format
     jahr_kalenderWoche = res.date.strftime("%y_%W")
     # here we update the KW messages
-    await update_KW_Message(jahr_kalenderWoche)
+    await update_kw_message(jahr_kalenderWoche)
 
 
 @client.tree.command(
@@ -135,6 +137,8 @@ async def edit_result(
     ergebnis: str = "-1",
     format: str = "-1",
 ):
+    print("\nedit_result was called\n")
+
     message_id.strip
     mein_team.strip()
     gegner_team.strip()
@@ -177,7 +181,7 @@ async def edit_result(
 
     try:
         res = result_list.edit(
-            message_id, res, uhrzeit, datum
+            message_id, res, uhrzeit, datum, old_jahrKW
         )  # uhrzeit und datum angefügt, zum überprüfen welche values übernommen werden sollen
     except:
         await interaction.response.send_message(
@@ -197,11 +201,11 @@ async def edit_result(
     jahr_kalenderWoche = res.date.strftime("%y_%W")
 
     # here we update the KW messages
-    await update_KW_Message(jahr_kalenderWoche)
+    await update_kw_message(jahr_kalenderWoche)
 
     if jahr_kalenderWoche != old_jahrKW:
         # if KW was changed during edit we need to update both messages
-        await update_KW_Message(old_jahrKW)
+        await update_kw_message(old_jahrKW)
 
 
 @client.tree.command(
@@ -214,6 +218,8 @@ async def delete_result(
     interaction: discord.Interaction,
     message_id: str,
 ):
+    print("\ndelete_result was called\n")
+
     message_id.strip()  # führende und endende leerzeichen in userinput -> strip removed diese
     try:
         message = await interaction.channel.fetch_message(message_id)
@@ -236,10 +242,10 @@ async def delete_result(
     await interaction.response.send_message(
         content="Nachricht wurde gelöscht", delete_after=30
     )
-    await update_KW_Message(kw)
+    await update_kw_message(kw)
 
 
-async def update_KW_Message(jahr_KW):
+async def update_kw_message(jahr_KW):
     print(f'starting main.update_KW_Message for KW: {jahr_KW}\n')
     channel = client.get_channel(MATCHES_AND_RESULTS)
 
@@ -250,7 +256,7 @@ async def update_KW_Message(jahr_KW):
     try:
         message_ID = result_list.read_dictionary(jahr_KW)  # message_id finden
     except KeyError:
-        message_ID = await create_KW_message(jahr_KW)
+        message_ID = await create_kw_message(jahr_KW)
 
     try:
         message = await channel.fetch_message(message_ID)
@@ -272,7 +278,7 @@ async def update_KW_Message(jahr_KW):
     print(f'finished main.update_KW_Message for KW: {jahr_KW}\n')
 
 
-async def create_KW_message(jahr_KW):
+async def create_kw_message(jahr_KW):
     print(f'starting main.create_KW_Message for KW: {jahr_KW}\n')
     channel = client.get_channel(MATCHES_AND_RESULTS)
 
@@ -310,7 +316,7 @@ async def create_KW_message(jahr_KW):
         result_list.update_dictionary(
             kw_liste[x], new_kw_message.id
         )  # enter new Message_id into dict
-        await update_KW_Message(kw_liste[x])  # message gets properly written here
+        await update_kw_message(kw_liste[x])  # message gets properly written here
     print(f'finished main.create_KW_Message for KW: {jahr_KW}\n')
     return message_ID
 

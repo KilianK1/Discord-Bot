@@ -1,5 +1,4 @@
 /.vscode
 /Cogs
 /__pycache__
-*.json
-!dictionary.json
+gurken/

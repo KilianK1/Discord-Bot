@@ -9,7 +9,7 @@ import jsonpickle
 
 
 def add(result: result_object.result):
-    print("executing result_list.add")
+    print("\nexecuting result_list.add")
     jahr_kalenderWoche = result.date.strftime("%y_%W")
 
     try:
@@ -25,31 +25,34 @@ def add(result: result_object.result):
         print(r.toString())
 
     # these are the things we do to keep everything synced up after a change
-    
+    update_dictionary(result.id, jahr_kalenderWoche)
     write(res_list, jahr_kalenderWoche)
     print('finished result_list.add\n')
 
 
-def edit(message_id: str, result_edit: result_object.result, uhrzeit, datum):
-    print("executing result_list.edit")
-    kw = read_dictionary(message_id)
+def edit(message_id: str, result_edit: result_object.result, uhrzeit, datum, kw: str):
+    print("\nexecuting result_list.edit")
     liste = read(kw)
 
     for r in liste:
         if r.id == message_id:
             print(r.toString())
             result = r
+            break
     result.update(result_edit, uhrzeit, datum)
-
+    new_kw = result.date.strftime("%y_%W")
     # these are the things we do to keep everything synced up after a change
     print(f"result should now be edited: {result.toString()}")
-    delete(message_id)  # einmal löschen und neu adden falls KW sich geändert hat
-    add(result)
+
+    #check if kw is changed 
+    if(kw != new_kw):
+        delete(message_id)  # einmal löschen und neu adden wenn KW sich geändert hat
+        add(result)
     return result
 
 
 def delete(message_id: str):
-    print("executing result_list.delete")
+    print("\nexecuting result_list.delete")
     kw = read_dictionary(message_id)
     liste = read(kw)
 
@@ -65,15 +68,7 @@ def update_dictionary(key, value):
     try:
         dictionary = read("dictionary")  # open file and return dictionary
     except IOError:
-        path = os.path.join('gurken', 'dictionary.json')
-        if not os.path.exists(path):
-            new_dictionary = {}  # creating a dictionary because it didnt exist yet
-            write(new_dictionary, "dictionary")
-            dictionary = new_dictionary
-        else:
-            raise IOError(
-                "json file couldnt be opened. It seems to exist but it couldnt be opened"
-            )
+        create_dictionary()
     dictionary[key] = value
     sorted_dict = dict(sorted(dictionary.items()))
     try:
@@ -89,19 +84,24 @@ def read_dictionary(KW_or_ID):
     try:
         dictionary = read("dictionary")  # open file and return dict
     except IOError:
-        path = os.path.join('gurken', 'dictionary.json')
-        print(f"file dictionary.json didnt exist yet")
-        if not os.path.isfile(path):
-            new_dictionary = {}  # creating a dictionary because it didnt exist yet
-            write(new_dictionary, "dictionary")
-        else:
-            raise IOError("json file seems to exist but it couldnt be opened")
+        dictionary = create_dictionary()
+        
     try:
         id_or_kw_return = dictionary[KW_or_ID]
     except KeyError:
         print(f"Key {KW_or_ID} is not yet in Dictionary")
         raise KeyError()
     return id_or_kw_return
+
+def create_dictionary():
+    path = os.path.join('gurken', 'dictionary.json')
+    print(f"file dictionary.json didnt exist yet")
+    if not os.path.isfile(path):
+        new_dictionary = {}  # creating a dictionary because it didnt exist yet
+        write(new_dictionary, "dictionary")
+        return new_dictionary
+    else:
+        raise IOError("json file seems to exist but it couldnt be opened")
 
 def read(file_name: str):
     path = os.path.join('gurken', file_name + '.json')
