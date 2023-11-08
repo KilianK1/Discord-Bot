@@ -60,8 +60,19 @@ def delete(message_id: str):
         if r.id == message_id:
             liste.remove(r)
     write(liste, kw)
+    delete_from_dictionary(message_id)
     return kw
 
+
+def delete_from_dictionary(key):
+    print(f"executing delete_from_dictionary(key: {key}")
+    try:
+        dictionary = read("dictionary")
+    except:
+        raise IOError("Dictionary couldnt be opened")
+    dictionary.pop(key) #removes from dictionary
+    write(dictionary, "dictionary")
+    
 
 def update_dictionary(key, value):
     print(f"executing update_dictionary(key: {key}, value: {value})")
@@ -71,11 +82,8 @@ def update_dictionary(key, value):
         create_dictionary()
     dictionary[key] = value
     sorted_dict = dict(sorted(dictionary.items()))
-    try:
-        write(sorted_dict, "dictionary")
-    except:
-        print("Error during pickling object (Possibly unsupported):")
-
+    write(sorted_dict, "dictionary")
+    
 
 # dictionary saves for all "KWs" a corresponding message id
 # dictionary also contains for all message_ids of individual results the corresponding kw

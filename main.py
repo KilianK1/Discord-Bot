@@ -247,9 +247,20 @@ async def delete_result(
 
 async def update_kw_message(jahr_KW):
     print(f'starting main.update_KW_Message for KW: {jahr_KW}\n')
-    channel = client.get_channel(MATCHES_AND_RESULTS)
-
     liste = result_list.read(jahr_KW)
+
+    if not liste: #liste ist leer
+        #delete file with list?  maybe dont do that
+        #delete message!
+        #delete dict entry for message! done
+        #delete from kw_liste in dict! done
+        id = result_list.read_dictionary(jahr_KW)
+        result_list.delete_from_dictionary(id)
+        kw_liste = result_list.read_dictionary("kw_liste")
+        kw_liste.remove(jahr_KW) #TODO
+
+
+    channel = client.get_channel(MATCHES_AND_RESULTS)
     # need to get all results from this week -> read corresponding file
 
     # Do I need a new message or does it exist? create it if doesnt exist
@@ -283,7 +294,6 @@ async def create_kw_message(jahr_KW):
     channel = client.get_channel(MATCHES_AND_RESULTS)
 
     # read entry "kw_liste" which contains a list of all existing weekly messages
-
     try:
         kw_liste = result_list.read_dictionary("kw_liste")
     except KeyError:
