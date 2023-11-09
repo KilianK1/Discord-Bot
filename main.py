@@ -278,7 +278,7 @@ async def update_kw_message(jahr_KW):
         )
         return
 
-    new_text = f"-----------------------------\n**KW {jahr_KW}:**\n\n"  # # ist für Header        TODO kann man hier nach Spiel sortieren?
+    new_text = f"-----------------------------\n# KW {jahr_KW}:\n\n"  # # ist für Header        TODO kann man hier nach Spiel sortieren?
     for x in liste:
         new_text += (
             x.toString() + "\n"
