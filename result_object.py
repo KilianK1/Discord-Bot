@@ -24,7 +24,7 @@ class result:
         datestring = self.date.strftime(
             "%a, %d.%m.%y, %H:%M Uhr"
         )  # datetime to string format
-        text = f"**{self.league}**\n**{datestring}:** {self.me} {self.result} {self.enemy}  {self.form}"
+        text = f"## {self.league}\n**{datestring}**: {self.me} {self.result} {self.enemy}  {self.form}"
         return text
 
 
