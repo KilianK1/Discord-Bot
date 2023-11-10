@@ -11,11 +11,10 @@ import result_list
 with open("configuration.json", "r") as config:
     data = json.load(config)
     token = data["token"]
+    MATCHES_AND_RESULTS = data["matches_and_results_channel"]
 
 locale.setlocale(locale.LC_ALL, "de_DE")
-MATCHES_AND_RESULTS = (
-    1163162296588185640  # TODO Hardcode matches and results channel-ID here
-)
+
 MY_GUILD = discord.Object(id=1162339357106131028)
 
 
@@ -77,12 +76,8 @@ async def add_result(
         "Bot ist am Arbeiten..."
     )  # wird ausgeführt, damit man message_id bekommen kann
 
-    antwort = (
-        await interaction.original_response()
-    )  # Nachricht, die ich gerade gesendet habe
-    message = (
-        await antwort.fetch()
-    )  # message transformiert, so dass ich id rausfinden kann
+    antwort = await interaction.original_response()  # Nachricht, die ich gerade gesendet habe
+    message = await antwort.fetch()  # message transformiert, so dass ich id rausfinden kann
     message_id = str(message.id)
 
     try:
@@ -244,21 +239,23 @@ async def delete_result(
     )
     await update_kw_message(kw)
 
+async def delete_kw_message(jahr_KW, message):
+    dict = result_list.read("dictionary")
+
+    #delete dict entry (kw, message_id)
+    dict.pop(jahr_KW)
+    #delete kw_liste(jahr_KW) entry in ditctionary
+    dict["kw_liste"].remove(jahr_KW)
+
+    result_list.write(dict ,"dictionary")
+    
+    #delete message
+    await message.delete()
+
 
 async def update_kw_message(jahr_KW):
     print(f'starting main.update_KW_Message for KW: {jahr_KW}\n')
     liste = result_list.read(jahr_KW)
-
-    if not liste: #liste ist leer
-        #delete file with list?  maybe dont do that
-        #delete message!
-        #delete dict entry for message! done
-        #delete from kw_liste in dict! done
-        id = result_list.read_dictionary(jahr_KW)
-        result_list.delete_from_dictionary(id)
-        kw_liste = result_list.read_dictionary("kw_liste")
-        kw_liste.remove(jahr_KW) #TODO
-
 
     channel = client.get_channel(MATCHES_AND_RESULTS)
     # need to get all results from this week -> read corresponding file
@@ -277,8 +274,12 @@ async def update_kw_message(jahr_KW):
             delete_after=30,
         )
         return
+    
+    if not liste: #liste ist leer
+        await delete_kw_message(jahr_KW, message)
+        return
 
-    new_text = f"-----------------------------\n# KW {jahr_KW}:\n\n"  # # ist für Header        TODO kann man hier nach Spiel sortieren?
+    new_text = f"# KW {jahr_KW}:\n\n"  # # ist für Header        TODO kann man hier nach Spiel sortieren?
     for x in liste:
         new_text += (
             x.toString() + "\n"

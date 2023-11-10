@@ -65,7 +65,7 @@ def delete(message_id: str):
 
 
 def delete_from_dictionary(key):
-    print(f"executing delete_from_dictionary(key: {key}")
+    print(f"executing delete_from_dictionary(key: {key})")
     try:
         dictionary = read("dictionary")
     except:
@@ -79,7 +79,7 @@ def update_dictionary(key, value):
     try:
         dictionary = read("dictionary")  # open file and return dictionary
     except IOError:
-        create_dictionary()
+        dictionary = create_dictionary()
     dictionary[key] = value
     sorted_dict = dict(sorted(dictionary.items()))
     write(sorted_dict, "dictionary")
