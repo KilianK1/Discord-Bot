@@ -3,7 +3,6 @@ import locale
 import discord
 from discord import app_commands
 import json
-import result_object
 import result_list
 
 
@@ -64,47 +63,45 @@ async def add_result(
 ):
     print("\nadd_result was called\n")
 
-    mein_team.strip()
-    gegner_team.strip()
-    liga.strip()
-    ergebnis.strip()
-    format.strip()
     uhrzeit.strip()
     datum.strip()  # es schleichen sich schnell führende und endende leerzeichen in userinput -> strip removed diese
-
-    await interaction.response.send_message(
-        "Bot ist am Arbeiten..."
-    )  # wird ausgeführt, damit man message_id bekommen kann
-
-    antwort = await interaction.original_response()  # Nachricht, die ich gerade gesendet habe
-    message = await antwort.fetch()  # message transformiert, so dass ich id rausfinden kann
-    message_id = str(message.id)
 
     try:
         date_format = zeit_format(datum=datum, zeit=uhrzeit)  # format
     except:
-        await message.edit(
+        await interaction.response.send_message(
             content="Format von Zeit oder Datum war nicht richtig, bitte versuche es erneut",
             delete_after=30,
         )
         return
+    await interaction.response.send_message(
+            content="Bot ist am Arbeiten..."
+        )
+    antwort = await interaction.original_response()  # Nachricht, die ich gerade gesendet habe
+    message_id = str(antwort.id)
 
-    res = result_object.result(
-        mein_team, gegner_team, date_format, liga, ergebnis, format, message_id
-    )  # erstelle result objekt
+    result_dict = {
+        "mein_team": mein_team.strip(),
+        "gegner_team": gegner_team.strip(),
+        "liga": liga.strip(),
+        "ergebnis": ergebnis.strip(),
+        "format": format.strip(),
+        "message_id": message_id,
+        "datetime": date_format
+    }
+
     try:
-        result_list.add(res)
+        liste, jahr_kw = result_list.add(result_dict)
     except:
-        await message.edit(content="Something went wrong", delete_after=30)
-        raise IOError("Somethin went wrong while adding the result")
-        # proper format
-    await message.edit(
-        content=res.toString()
+        await antwort.edit(content="Couldnt add result, looks like a bug :/", delete_after=30)
+        return
+
+    await antwort.edit(
+        content = result_list.result_to_string(result_dict)
         + f"\nNutze diese Message_ID zum löschen oder bearbeiten deines Ergebnisses: {message_id}"
-    )  # proper format
-    jahr_kalenderWoche = res.date.strftime("%y_%W")
-    # here we update the KW messages
-    await update_kw_message(jahr_kalenderWoche)
+    )
+    
+    await update_kw_message(jahr_kw, liste)
 
 
 @client.tree.command(
@@ -116,7 +113,7 @@ async def add_result(
     mein_team="Der Name deines Teams",
     gegner_team="Der Name des Gegner Teams",
     datum="Datum des Matches, Format: DD.MM.YY",
-    uhrzeit="Uhrzeit des Matches",
+    uhrzeit="Uhrzeit des Matches, Format: HH:MM",
     ergebnis="Ergebnis des Matches, leer lassen wenn noch nicht gespielt wurde",
     liga="Liga in der das Match stattfindet",
     format="BO1, BO2, etc. oder leer lassen",
@@ -133,15 +130,7 @@ async def edit_result(
     format: str = "-1",
 ):
     print("\nedit_result was called\n")
-
-    message_id.strip
-    mein_team.strip()
-    gegner_team.strip()
-    liga.strip()
-    ergebnis.strip()
-    format.strip()
-    uhrzeit.strip()
-    datum.strip()
+    
     try:
         message = await interaction.channel.fetch_message(message_id)
     except:
@@ -151,56 +140,58 @@ async def edit_result(
         )
         return
 
-    if datum != "-1":
-        date = zeit_format(
-            datum, "00:00"
-        )  # überprüfe format von datum und uhrzeit unabhängig voneinander
-    if (
-        uhrzeit != "-1"
-    ):  # erstelle datetime objekt, welches die relevante veränderung enthält. damit später combine ausgeführt werden kann
-        date = zeit_format("01.01.23", uhrzeit)
-    else:
-        date = zeit_format("01.01.23", "00:00")
-
-    res = result_object.result(
-        mein_team,
-        gegner_team,
-        date,
-        liga,
-        ergebnis,
-        format,
-        message_id,
-    )
-    # find in which KW message was before edit
-    old_jahrKW = result_list.read_dictionary(message_id)
-
+    uhrzeit.strip()
+    datum.strip()
+    # überprüfe format von datum und uhrzeit unabhängig voneinander
     try:
-        res = result_list.edit(
-            message_id, res, uhrzeit, datum, old_jahrKW
-        )  # uhrzeit und datum angefügt, zum überprüfen welche values übernommen werden sollen
+        if datum != "-1":
+            datetime.strptime(datum, "%d.%m.%y") 
+        
+        if uhrzeit != "-1":
+            datetime.strptime(uhrzeit, "%H:%M")
     except:
         await interaction.response.send_message(
-            content="Something went wrong", delete_after=30
+            "Format von Zeit/Datum ist falsch",
+            delete_after=30,
         )
-        raise IOError("Somethin went wrong while editing the result")
+        return
+
+    result_edit_dict = {
+        "mein_team": mein_team.strip(),
+        "gegner_team": gegner_team.strip(),
+        "liga": liga.strip(),
+        "ergebnis": ergebnis.strip(),
+        "format": format.strip(),
+        "message_id": message_id.strip(),
+        "date": datum,
+        "time": uhrzeit
+    }
+
+    try:
+        res, new_liste, new_jahr_kw, old_jahr_kw = result_list.edit(result_edit_dict)
+    except:
+        await interaction.response.send_message(
+            content="Couldnt find result you want to edit, check the message ID", delete_after=30
+        )
+        raise Exception
 
     await message.edit(
-        content=res.toString()
+        content = result_list.result_to_string(res)
         + f"\nNutze diese Message_ID zum löschen oder bearbeiten deines Ergebnisses: {message_id}"
     )
     await interaction.response.send_message(
         "Dein Ergebnis wurde bearbeitet",
         delete_after=30,
     )
-    # Which kw is message in after editing
-    jahr_kalenderWoche = res.date.strftime("%y_%W")
 
-    # here we update the KW messages
-    await update_kw_message(jahr_kalenderWoche)
+    old_liste = result_list.read(old_jahr_kw)
+    
+    # here we update the old kw message
+    await update_kw_message(old_jahr_kw, old_liste)
 
-    if jahr_kalenderWoche != old_jahrKW:
-        # if KW was changed during edit we need to update both messages
-        await update_kw_message(old_jahrKW)
+    if new_jahr_kw != old_jahr_kw:
+        # if KW was changed during edit we need to update new message as well
+        await update_kw_message(new_jahr_kw, new_liste)
 
 
 @client.tree.command(
@@ -225,19 +216,56 @@ async def delete_result(
         )
         return
 
-    await message.delete()
     try:
-        kw = result_list.delete(message_id)
+        kw, liste = result_list.delete(message_id)
     except:
         await interaction.response.send_message(
             content="Something went wrong", delete_after=30
         )
-        raise IOError("Somethin went wrong while deleting the result")
+        return
+
+    await message.delete()
 
     await interaction.response.send_message(
         content="Nachricht wurde gelöscht", delete_after=30
     )
-    await update_kw_message(kw)
+    await update_kw_message(kw, liste)
+
+
+async def update_kw_message(jahr_KW, liste):
+    print(f'\nstarting main.update_KW_Message for KW: {jahr_KW}\n')
+
+    channel = client.get_channel(MATCHES_AND_RESULTS)
+
+    
+    # Do I need a new message or does it exist? create it if doesnt exist
+    try:
+        message_ID = result_list.read_dictionary(jahr_KW)  # message_id finden
+    except KeyError:
+        message_ID = await create_kw_message(jahr_KW, liste)
+
+    try:
+        message = await channel.fetch_message(message_ID)
+    except:
+        await channel.send_message(
+            "Etwas ist schiefgelaufen, KW Messagge wurde nicht gefunden",
+            delete_after=30,
+        )
+        return
+    
+    if not liste: #liste ist leer
+        await delete_kw_message(jahr_KW, message)
+        return
+
+    new_text = f"# __KW {jahr_KW}:__\n\n"  # # ist für Header        TODO kann man hier nach Spiel sortieren?
+    for result in liste:
+        new_text += (
+            result_list.result_to_string(result) + "\n"
+        ) 
+
+    await message.edit(content=new_text)
+    print(f'finished main.update_KW_Message for KW: {jahr_KW}\n')
+
 
 async def delete_kw_message(jahr_KW, message):
     dict = result_list.read("dictionary")
@@ -253,45 +281,8 @@ async def delete_kw_message(jahr_KW, message):
     await message.delete()
 
 
-async def update_kw_message(jahr_KW):
-    print(f'starting main.update_KW_Message for KW: {jahr_KW}\n')
-    liste = result_list.read(jahr_KW)
-
-    channel = client.get_channel(MATCHES_AND_RESULTS)
-    # need to get all results from this week -> read corresponding file
-
-    # Do I need a new message or does it exist? create it if doesnt exist
-    try:
-        message_ID = result_list.read_dictionary(jahr_KW)  # message_id finden
-    except KeyError:
-        message_ID = await create_kw_message(jahr_KW)
-
-    try:
-        message = await channel.fetch_message(message_ID)
-    except:
-        await channel.send_message(
-            "Etwas ist schiefgelaufen, KW Messagge wurde nicht gefunden",
-            delete_after=30,
-        )
-        return
-    
-    if not liste: #liste ist leer
-        await delete_kw_message(jahr_KW, message)
-        return
-
-    new_text = f"# KW {jahr_KW}:\n\n"  # # ist für Header        TODO kann man hier nach Spiel sortieren?
-    for x in liste:
-        new_text += (
-            x.toString() + "\n"
-        )  # für jedes element in liste wird der string angehängt + newline
-        # durch .toKWString ersetzen wenn anderes format gewünscht
-
-    await message.edit(content=new_text)
-    print(f'finished main.update_KW_Message for KW: {jahr_KW}\n')
-
-
-async def create_kw_message(jahr_KW):
-    print(f'starting main.create_KW_Message for KW: {jahr_KW}\n')
+async def create_kw_message(jahr_KW, liste):
+    print(f'\nstarting main.create_KW_Message for KW: {jahr_KW}\n')
     channel = client.get_channel(MATCHES_AND_RESULTS)
 
     # read entry "kw_liste" which contains a list of all existing weekly messages
@@ -317,20 +308,23 @@ async def create_kw_message(jahr_KW):
     # creating a new KW message we add it to the list
 
     # delete and rewrite all following weekly messages to restore order
-    for x in range(index + 1, len(kw_liste)):
-        old_message_id = result_list.read_dictionary(kw_liste[x])
-        old_kw_message = await channel.fetch_message(old_message_id)
-        await old_kw_message.delete()
-        new_kw_message = await channel.send(
-            f"**{kw_liste[x]}:**"
-        )  # New Placeholder message
-        result_list.update_dictionary(
-            kw_liste[x], new_kw_message.id
-        )  # enter new Message_id into dict
-        await update_kw_message(kw_liste[x])  # message gets properly written here
+    for item in range(index + 1, len(kw_liste)):
+        await rewrite_KW(kw_liste[item], channel, liste)
     print(f'finished main.create_KW_Message for KW: {jahr_KW}\n')
     return message_ID
 
+async def rewrite_KW(item, channel, liste):
+    old_message_id = result_list.read_dictionary(item)
+    old_kw_message = await channel.fetch_message(old_message_id)
+    await old_kw_message.delete()
+
+    # New Placeholder message
+    new_kw_message = await channel.send(f"**{item}:**")  
+    
+    # enter new Message_id into dict
+    result_list.update_dictionary(item, new_kw_message.id)
+
+    await update_kw_message(item, liste)  # message gets properly written here
 
 def zeit_format(datum: str, zeit: str):
     # parse input values to datetime objects according to format given in strptime
@@ -355,7 +349,6 @@ def zeit_format(datum: str, zeit: str):
     except NameError:
         raise Exception("Could not format date")
 
-    return Date_final
-
+    return Date_final.isoformat()
 
 client.run(token)
