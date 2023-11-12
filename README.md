@@ -15,6 +15,8 @@
     2. Bot notified result author wenn ein Match termin rum ist und kein Result eingetragen wurde
     3. Automated ?Yearly/Monthly/Weekly? reports on amount of matches played and other stats etc.
     4. Bessere möglichkeit um result zu editen? User replied auf messsage oder ähnliches? Hab bisher nichts gefunden
+    5. Zuweisung von Team zum result nach team rolle? -> schwierig für doppelte team zugehörigkeit, viel hard coding
+    6. Gruppierung nach Liga? -> String matching schwierig weil user oft gleiche liga unterschiedlich schreiben -> jeder typo wird zu eigenem Absatz
 
 ## ERRORS THAT CAN HAPPEN:
     1. deleting a bot message manually somewhere can desync data the bot has and whats actually on the server 
