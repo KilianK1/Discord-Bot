@@ -30,3 +30,4 @@
         -> Update all elements after the one we added?    for weekly messages this would mean deleting and readding or keeping empty messages
     
     2. Edge case: clear a list of all entries, what happens? -> need to delete list and corresponding kw message
+    3. changed result objects to result dictionaries for easier json handling
