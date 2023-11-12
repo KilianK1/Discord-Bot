@@ -1,5 +1,6 @@
 import os.path
 import jsonpickle
+import json
 from datetime import datetime
 
 
@@ -153,10 +154,8 @@ def read(file_name: str):
     path = os.path.join('gurken', file_name + '.json')
     print(f" result_list.read gurken\{file_name}.json")
     try:
-        file = open(path, "r")
-        json_str = file.read()
-        # open file and return whats inside
-        return jsonpickle.decode(json_str, keys=True)
+        with open(path, "r") as read_content:
+            return json.load(read_content)
     except IOError:
         print(f"file gurken\{file_name}.json does not exist yet")
         raise IOError(
@@ -165,11 +164,10 @@ def read(file_name: str):
 
 def write(pickle_data, file_name: str):
     path = os.path.join('gurken', file_name + '.json')
-    json_str = jsonpickle.encode(pickle_data, keys=True, indent = 4)
     print(f"writing to gurken\{file_name}.json")
     try:
-        file = open(path, "w")
-        file.write(json_str)
+        with open(path, "w") as write_file:
+            json.dump(pickle_data, write_file, indent = 4)
     except:
         print("Error during pickling object (Possibly unsupported):")
 
