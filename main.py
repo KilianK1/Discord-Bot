@@ -1,7 +1,7 @@
-from datetime import datetime
-import locale
 import discord
 from discord import app_commands
+from datetime import datetime
+import locale
 import json
 import result_list
 
@@ -67,7 +67,7 @@ async def add_result(
     datum.strip()  # es schleichen sich schnell führende und endende leerzeichen in userinput -> strip removed diese
 
     try:
-        date_format = zeit_format(datum=datum, zeit=uhrzeit)  # format
+        date_format = result_list.zeit_format(datum=datum, zeit=uhrzeit)  # format
     except:
         await interaction.response.send_message(
             content="Format von Zeit oder Datum war nicht richtig, bitte versuche es erneut",
@@ -325,30 +325,5 @@ async def rewrite_KW(item, channel, liste):
     result_list.update_dictionary(item, new_kw_message.id)
 
     await update_kw_message(item, liste)  # message gets properly written here
-
-def zeit_format(datum: str, zeit: str):
-    # parse input values to datetime objects according to format given in strptime
-    try:
-        zeit_parse = datetime.strptime(
-            zeit, "%H:%M"
-        )  # %H:%M    accepts time in format 'HH:MM' with H = 0-23 and M = 0-59
-    except ValueError:
-        raise Exception("Invalid time given")
-    try:
-        datum_parse = datetime.strptime(
-            datum, "%d.%m.%y"
-        )  # accepts date in format 'DD.MM.YY'
-    except ValueError:
-        raise Exception("Invalid date given")
-
-    try:
-        Date_final = datetime.combine(
-            datum_parse.date(), zeit_parse.time()
-        )  # combine date and time into a single object
-
-    except NameError:
-        raise Exception("Could not format date")
-
-    return Date_final.isoformat()
 
 client.run(token)

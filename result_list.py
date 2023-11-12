@@ -172,3 +172,29 @@ def write(pickle_data, file_name: str):
         file.write(json_str)
     except:
         print("Error during pickling object (Possibly unsupported):")
+
+
+def zeit_format(datum: str, zeit: str):
+    # parse input values to datetime objects according to format given in strptime
+    try:
+        zeit_parse = datetime.strptime(
+            zeit, "%H:%M"
+        )  # %H:%M    accepts time in format 'HH:MM' with H = 0-23 and M = 0-59
+    except ValueError:
+        raise Exception("Invalid time given")
+    try:
+        datum_parse = datetime.strptime(
+            datum, "%d.%m.%y"
+        )  # accepts date in format 'DD.MM.YY'
+    except ValueError:
+        raise Exception("Invalid date given")
+
+    try:
+        Date_final = datetime.combine(
+            datum_parse.date(), zeit_parse.time()
+        )  # combine date and time into a single object
+
+    except NameError:
+        raise Exception("Could not format date")
+
+    return Date_final.isoformat()
