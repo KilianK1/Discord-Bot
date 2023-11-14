@@ -10,8 +10,8 @@ import result_list
 with open("configuration.json", "r") as config:
     data = json.load(config)
     token = data["token"]
-    MATCHES_AND_RESULTS = data["matches_and_results_channel"]
-    result_channel = data["result_channel"]
+    MATCHES_AND_RESULTS = data["MATCHES_AND_RESULTS"]
+    result_channel = data["result_channels"]
 
 locale.setlocale(locale.LC_ALL, "de_DE")
 
@@ -66,7 +66,7 @@ async def add_result(
 
     uhrzeit.strip()
     datum.strip()  # es schleichen sich schnell führende und endende leerzeichen in userinput -> strip removed diese
-    channel_id = interaction.channel_id
+    channel_id = str(interaction.channel_id)
 
     try:
         date_format = result_list.zeit_format(datum=datum, zeit=uhrzeit)  # format
@@ -264,26 +264,31 @@ async def update_kw_message(jahr_KW, liste):
     await message.edit(content = text)
     print(f'finished main.update_KW_Message for KW: {jahr_KW}\n')
 
-def kw_string(liste, jahr_KW):
-
+def kw_string(list_of_results, jahr_KW):
+    print("calculating kw string")
+    print(f"input list:{list_of_results}")
     split_dict = dict()
-    while liste:
-        current_game = liste[0]["game"] #take first results game
+    while len(list_of_results) > 0:
+        current_game = list_of_results[0]["game"] #take first results game
         split_dict[current_game] = list()   #create a list for each game
-        for i in liste:
+        for i in list(list_of_results): # iterate over copy so removing is no problem
             if i["game"] == current_game:
                 # fülle neue liste mit allen results die zu current game gehören
-                split_dict[current_game].append(liste[i])   
+                split_dict[current_game].append(i)
+                list_of_results.remove(i)
             #sollte automatisch nach zeit sortiert sein weil input liste nach zeit sortiert war
 
+    print(f"sorted dict: {split_dict}")
+
     new_text = f"# __KW {jahr_KW}:__\n\n"  # # ist für Header
-    for split_liste in split_dict:
-        game = split_liste[0]["game"]
+    for game in split_dict:
+        split_list = split_dict[game]
         new_text += "## " + game + "\n"
-        for result in split_liste:
+        for result in split_list:
             new_text += (
                 result_list.result_to_string(result) + "\n"
             ) 
+    return new_text
 
 async def delete_kw_message(jahr_KW, message):
     dict = result_list.read("dictionary")

@@ -99,7 +99,7 @@ def result_to_string(result: dict):
             "%a, %d.%m.%y, %H:%M Uhr"
         )  # datetime to string format
     
-    text = f"## {result['liga']}\n**{datestring}**: {result['mein_team']} {result['ergebnis']} {result['gegner_team']}  {result['format']}"
+    text = f"### {result['liga']}\n**{datestring}**: {result['mein_team']} {result['ergebnis']} {result['gegner_team']}  {result['format']}"
     return text
 
 
