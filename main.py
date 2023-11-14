@@ -283,7 +283,7 @@ def kw_string(list_of_results, jahr_KW):
     new_text = f"# __KW {jahr_KW}:__\n\n"  # # ist für Header
     for game in split_dict:
         split_list = split_dict[game]
-        new_text += "## " + game + "\n"
+        new_text += "## __" + game + "__\n"
         for result in split_list:
             new_text += (
                 result_list.result_to_string(result) + "\n"
