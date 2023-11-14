@@ -47,7 +47,7 @@ async def on_ready():
     mein_team="Der Name deines Teams",
     gegner_team="Der Name des Gegner Teams",
     datum="Datum des Matches, Format: DD.MM.YY",
-    uhrzeit="Uhrzeit des Matches",
+    uhrzeit="Uhrzeit des Matches, Format: HH:MM",
     ergebnis="Ergebnis des Matches, leer lassen wenn noch nicht gespielt wurde",
     liga="Liga in der das Match stattfindet",
     format="BO1, BO2, etc. oder leer lassen",
@@ -174,7 +174,7 @@ async def edit_result(
         res, new_liste, new_jahr_kw, old_jahr_kw = result_list.edit(result_edit_dict)
     except:
         await interaction.response.send_message(
-            content="Couldnt find result you want to edit, check the message ID", delete_after=30
+            content = "Couldnt find result you want to edit, check the message ID", delete_after=30
         )
         raise Exception
 
@@ -266,7 +266,21 @@ async def update_kw_message(jahr_KW, liste):
 
 def kw_string(list_of_results, jahr_KW):
     print("calculating kw string")
+    split_dict = splitting_list(list_of_results)
+
+    new_text = f"# __KW {jahr_KW}:__\n\n"  # # ist für Header
+    for game in split_dict:
+        split_list = split_dict[game]
+        new_text += "## __" + game + "__\n"
+        for result in split_list:
+            new_text += (
+                result_list.result_to_string(result) + "\n"
+            ) 
+    return new_text
+
+def splitting_list(list_of_results):
     print(f"input list:{list_of_results}")
+
     split_dict = dict()
     while len(list_of_results) > 0:
         current_game = list_of_results[0]["game"] #take first results game
@@ -279,25 +293,17 @@ def kw_string(list_of_results, jahr_KW):
             #sollte automatisch nach zeit sortiert sein weil input liste nach zeit sortiert war
 
     print(f"sorted dict: {split_dict}")
+    return split_dict
 
-    new_text = f"# __KW {jahr_KW}:__\n\n"  # # ist für Header
-    for game in split_dict:
-        split_list = split_dict[game]
-        new_text += "## __" + game + "__\n"
-        for result in split_list:
-            new_text += (
-                result_list.result_to_string(result) + "\n"
-            ) 
-    return new_text
 
 async def delete_kw_message(jahr_KW, message):
     dict = result_list.read("dictionary")
 
     #delete dict entry (kw, message_id)
     dict.pop(jahr_KW)
-    #delete kw_liste(jahr_KW) entry in ditctionary
-    dict["kw_liste"].remove(jahr_KW)
 
+    #delete kw_liste[jahr_KW] entry in ditctionary
+    dict["kw_liste"].remove(jahr_KW)
     result_list.write(dict ,"dictionary")
     
     #delete message
