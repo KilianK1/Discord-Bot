@@ -1,5 +1,4 @@
 import os.path
-import jsonpickle
 import json
 from datetime import datetime
 
@@ -99,7 +98,11 @@ def result_to_string(result: dict):
             "%a, %d.%m.%y, %H:%M Uhr"
         )  # datetime to string format
     
-    text = f"### {result['liga']}\n**{datestring}**: {result['mein_team']} {result['ergebnis']} {result['gegner_team']}  {result['format']}"
+    text = f"### {result['liga']}\n"
+    text += f"**{datestring}**: {result['mein_team']} {result['ergebnis']} {result['gegner_team']}  {result['format']}\n"
+    if(result['stream_link'] != ""):
+        text += f":social_twitch: <{result['stream_link']}>"
+    
     return text
 
 

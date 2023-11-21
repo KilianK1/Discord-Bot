@@ -12,6 +12,7 @@ with open("configuration.json", "r") as config:
     token = data["token"]
     MATCHES_AND_RESULTS = data["MATCHES_AND_RESULTS"]
     result_channel = data["result_channels"]
+    game_icons = data["game_icons"]
 
 locale.setlocale(locale.LC_ALL, "de_DE")
 
@@ -51,6 +52,7 @@ async def on_ready():
     ergebnis="Ergebnis des Matches, leer lassen wenn noch nicht gespielt wurde",
     liga="Liga in der das Match stattfindet",
     format="BO1, BO2, etc. oder leer lassen",
+    stream_link="Link zu einem Stream wenn das Match übertragen wird"
 )
 async def add_result(
     interaction: discord.Interaction,
@@ -61,6 +63,7 @@ async def add_result(
     uhrzeit: str,
     ergebnis: str = "0 - 0",
     format: str = "",
+    stream_link: str = ""
 ):
     print("\nadd_result was called\n")
 
@@ -90,7 +93,8 @@ async def add_result(
         "format": format.strip(),
         "message_id": message_id,
         "datetime": date_format,
-        "game": result_channel[channel_id]
+        "game": result_channel[channel_id],
+        "stream_link": stream_link.strip()
     }
 
     try:
@@ -120,17 +124,19 @@ async def add_result(
     ergebnis="Ergebnis des Matches, leer lassen wenn noch nicht gespielt wurde",
     liga="Liga in der das Match stattfindet",
     format="BO1, BO2, etc. oder leer lassen",
+    stream_link = "Link zu einem Stream wenn das Match übertragen wird"
 )
 async def edit_result(
     interaction: discord.Interaction,
     message_id: str,
+    ergebnis: str = "-1",
+    datum: str = "-1",
+    uhrzeit: str = "-1",
+    stream_link: str = "-1",
+    liga: str = "-1",
+    format: str = "-1",
     mein_team: str = "-1",
     gegner_team: str = "-1",
-    datum: str = "-1",
-    liga: str = "-1",
-    uhrzeit: str = "-1",
-    ergebnis: str = "-1",
-    format: str = "-1",
 ):
     print("\nedit_result was called\n")
     
@@ -167,7 +173,8 @@ async def edit_result(
         "format": format.strip(),
         "message_id": message_id.strip(),
         "date": datum,
-        "time": uhrzeit
+        "time": uhrzeit,
+        "stream_link": stream_link.strip(),
     }
 
     try:
@@ -267,11 +274,12 @@ async def update_kw_message(jahr_KW, liste):
 def kw_string(list_of_results, jahr_KW):
     print("calculating kw string")
     split_dict = splitting_list(list_of_results)
-
-    new_text = f"# __KW {jahr_KW}:__\n\n"  # # ist für Header
+    jahrkw_datetime = datetime.strptime(jahr_KW, "%y_%W")
+    jahr_KW = datetime.strftime(jahrkw_datetime, "%W,  %Y")
+    new_text = f"# __Kalenderwoche: {jahr_KW}:__\n\n"  # # ist für Header
     for game in split_dict:
         split_list = split_dict[game]
-        new_text += "## __" + game + "__\n"
+        new_text += f"{game_icons[game]}## __{game}__\n"
         for result in split_list:
             new_text += (
                 result_list.result_to_string(result) + "\n"
